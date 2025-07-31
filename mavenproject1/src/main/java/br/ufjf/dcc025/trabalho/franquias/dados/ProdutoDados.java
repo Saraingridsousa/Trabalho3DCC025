@@ -2,12 +2,12 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package br.ufjf.dcc025.trabalho.franquias.model.usuarios;
+package br.ufjf.dcc025.trabalho.franquias.dados;
 
 /**
  *
  * @author sarai
  */
-public class Vendedor extends Usuario {
+public class ProdutoDados {
     
 }
