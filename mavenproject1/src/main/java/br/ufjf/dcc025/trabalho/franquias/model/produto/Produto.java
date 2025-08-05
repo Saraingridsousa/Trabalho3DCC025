@@ -16,8 +16,8 @@ public class Produto implements Serializable {
         this.estoque = estoque;
     }
 
-    public boolean isDisponivel(int quantidade) {
-        return estoque >= quantidade;
+    public boolean isDisponivel() {
+        return estoque > 0;
     }
 
     public Long getId() {
