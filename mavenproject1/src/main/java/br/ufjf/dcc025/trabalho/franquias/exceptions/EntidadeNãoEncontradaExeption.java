@@ -1,13 +1,8 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package br.ufjf.dcc025.trabalho.franquias.exceptions;
 
-/**
- *
- * @author sarai
- */
-public class EntidadeNãoEncontradaExeption {
+public class EntidadeNaoEncontradaException extends FranquiaException {
     
+    public EntidadeNaoEncontradaException(String message) {
+        super(message);
+    }
 }
