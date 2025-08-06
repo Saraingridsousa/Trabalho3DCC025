@@ -5,10 +5,9 @@ import br.ufjf.dcc025.trabalho.franquias.service.UsuarioService;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class LoginPainel extends JFrame {
-    private UsuarioService usuarioService;
+    private final UsuarioService usuarioService;
     private JTextField emailField;
     private JPasswordField senhaField;
     private JButton loginButton;
@@ -29,11 +28,8 @@ public class LoginPainel extends JFrame {
         senhaField = new JPasswordField(20);
         loginButton = new JButton("Entrar");
         
-        loginButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                realizarLogin();
-            }
+        loginButton.addActionListener((ActionEvent e) -> {
+            realizarLogin();
         });
     }
     

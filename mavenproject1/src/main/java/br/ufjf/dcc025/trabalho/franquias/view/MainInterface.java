@@ -10,15 +10,14 @@ import br.ufjf.dcc025.trabalho.franquias.service.ProdutoService;
 import br.ufjf.dcc025.trabalho.franquias.service.PedidoService;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class MainInterface extends JFrame {
-    private Usuario usuarioLogado;
-    private UsuarioService usuarioService;
-    private FranquiaService franquiaService;
-    private ProdutoService produtoService;
-    private PedidoService pedidoService;
+    private final Usuario usuarioLogado;
+    private final UsuarioService usuarioService;
+    private final FranquiaService franquiaService;
+    private final ProdutoService produtoService;
+    private final PedidoService pedidoService;
     
     private JLabel lblUsuarioLogado;
     private JPanel panelPrincipal;
@@ -191,7 +190,7 @@ public class MainInterface extends JFrame {
         JButton btn = new JButton();
         btn.setLayout(new BorderLayout());
         btn.setPreferredSize(new Dimension(200, 100));
-        btn.setBorder(BorderFactory.createRaisedBorderBorder());
+        btn.setBorder(BorderFactory.createRaisedBevelBorder());
         
         JLabel lblTitulo = new JLabel(titulo, JLabel.CENTER);
         lblTitulo.setFont(new Font("Arial", Font.BOLD, 16));
@@ -209,7 +208,7 @@ public class MainInterface extends JFrame {
     
     private JPanel criarStatusPanel() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        panel.setBorder(BorderFactory.createLoweredBorderBorder());
+        panel.setBorder(BorderFactory.createLoweredBevelBorder());
         
         JLabel lblStatus = new JLabel("Sistema pronto");
         panel.add(lblStatus);
@@ -285,7 +284,7 @@ public class MainInterface extends JFrame {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             try {
-                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeel());
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             } catch (Exception e) {
                 e.printStackTrace();
             }

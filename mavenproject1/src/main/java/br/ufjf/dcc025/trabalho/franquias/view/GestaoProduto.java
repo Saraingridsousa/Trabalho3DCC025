@@ -1,25 +1,23 @@
 package br.ufjf.dcc025.trabalho.franquias.view;
 
-import br.ufjf.dcc025.trabalho.franquias.model.Produto;
+import br.ufjf.dcc025.trabalho.franquias.model.produto.Produto;
 import br.ufjf.dcc025.trabalho.franquias.service.ProdutoService;
 import br.ufjf.dcc025.trabalho.franquias.exceptions.ValidacaoException;
 import br.ufjf.dcc025.trabalho.franquias.exceptions.EntidadeNaoEncontradaException;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.List;
 
-public class GestaoProduitos extends JFrame {
-    private ProdutoService produtoService;
+public class GestaoProduto extends JFrame {
+    private final ProdutoService produtoService;
     private JTable tableProdutos;
     private DefaultTableModel tableModel;
     private JTextField txtNome, txtDescricao, txtPreco, txtEstoque;
     private JButton btnSalvar, btnEditar, btnExcluir, btnLimpar;
     private Long produtoEditandoId = null;
     
-    public GestaoProduitos() {
+    public GestaoProduto() {
         this.produtoService = new ProdutoService();
         initComponents();
         carregarProdutos();
@@ -189,7 +187,7 @@ public class GestaoProduitos extends JFrame {
             
             if (produtoEditandoId == null) {
                 // Criando novo produto
-                produtoService.criar(produto);
+                produtoService.cadastrar(produto);
                 JOptionPane.showMessageDialog(this, "Produto criado com sucesso!");
             } else {
                 // Editando produto existente
@@ -221,7 +219,7 @@ public class GestaoProduitos extends JFrame {
                 txtNome.setText(produto.getNome());
                 txtDescricao.setText(produto.getDescricao());
                 txtPreco.setText(String.valueOf(produto.getPreco()));
-                txtEstoque.setText(String.valueOf(produto.getQuantidadeEstoque()));
+                txtEstoque.setText(String.valueOf(produto.getEstoque()));
                 
                 produtoEditandoId = id;
                 btnSalvar.setText("Atualizar");
@@ -242,7 +240,7 @@ public class GestaoProduitos extends JFrame {
             
             if (opcao == JOptionPane.YES_OPTION) {
                 try {
-                    produtoService.deletar(id);
+                    produtoService.remover(id);
                     JOptionPane.showMessageDialog(this, "Produto excluído com sucesso!");
                     carregarProdutos();
                 } catch (EntidadeNaoEncontradaException e) {
@@ -275,7 +273,7 @@ public class GestaoProduitos extends JFrame {
                 produto.getNome(),
                 produto.getDescricao(),
                 String.format("R$ %.2f", produto.getPreco()),
-                produto.getQuantidadeEstoque(),
+                produto.getEstoque(),
                 produto.isDisponivel() ? "Sim" : "Não"
             };
             tableModel.addRow(row);
@@ -285,12 +283,12 @@ public class GestaoProduitos extends JFrame {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             try {
-                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeel());
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             } catch (Exception e) {
                 e.printStackTrace();
             }
             
-            new GestaoProduitos().setVisible(true);
+            new GestaoProduto().setVisible(true);
         });
     }
 }
