@@ -103,7 +103,7 @@ public class Pedido implements Serializable {
     }
     
     public List<ItemPedido> getItens() {
-        return new ArrayList<>(itens); // Retorna cópia para proteger encapsulamento
+        return new ArrayList<>(itens);
     }
     
     public LocalDateTime getDataCriacao() {

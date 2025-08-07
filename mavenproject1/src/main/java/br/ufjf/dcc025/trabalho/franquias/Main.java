@@ -11,13 +11,13 @@ import javax.swing.UIManager;
 public class Main {
     
     public static void main(String[] args) {
-        // Verificar se deve executar testes
+        // Verifica se deve executar testes
         if (args.length > 0 && "--test".equals(args[0])) {
             executarTestes();
             return;
         }
         
-        // Verificar se deve mostrar ajuda
+        // Verifica se deve mostrar ajuda
         if (args.length > 0 && "--help".equals(args[0])) {
             mostrarAjuda();
             return;
@@ -59,7 +59,6 @@ public class Main {
             System.out.println("Iniciando aplicação...");
             System.out.println();
             
-            // Criar e mostrar a tela de login
             LoginPainel loginPanel = new LoginPainel();
             loginPanel.setVisible(true);
             
@@ -81,11 +80,8 @@ public class Main {
         System.out.println("=================================");
         
         try {
-            // Executar testes do UsuarioService
             UsuarioServiceTest usuarioTest = new UsuarioServiceTest();
             usuarioTest.executarTodosTestes();
-            
-            // Aqui poderiam ser executados outros testes
             
             System.out.println("\nTodos os testes foram executados.");
             

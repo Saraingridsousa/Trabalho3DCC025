@@ -3,9 +3,10 @@
  */
 package br.ufjf.dcc025.trabalho.franquias.test;
 
+import br.ufjf.dcc025.trabalho.franquias.exceptions.AcessoNegadoException;
+import br.ufjf.dcc025.trabalho.franquias.exceptions.ValidacaoException;
 import br.ufjf.dcc025.trabalho.franquias.model.usuarios.*;
 import br.ufjf.dcc025.trabalho.franquias.service.UsuarioService;
-import br.ufjf.dcc025.trabalho.franquias.exceptions.FranquiaException;
 
 public class UsuarioServiceTest {
     
@@ -18,8 +19,7 @@ public class UsuarioServiceTest {
     public void testCadastrarDono() {
         System.out.println("=== Teste: Cadastrar Dono ===");
         try {
-            Dono dono = new Dono("João Silva", "joao@teste.com", "123456");
-            usuarioService.cadastrarUsuario(dono);
+            Dono dono = usuarioService.cadastrarDono("João Silva", "123.456.789-00", "joao@teste.com", "123456");
             
             assert dono != null : "Dono não deveria ser null";
             assert dono.getId() != null : "ID do dono não deveria ser null";
@@ -39,8 +39,7 @@ public class UsuarioServiceTest {
     public void testCadastrarGerente() {
         System.out.println("\n=== Teste: Cadastrar Gerente ===");
         try {
-            Gerente gerente = new Gerente("Maria Santos", "maria@teste.com", "123456");
-            usuarioService.cadastrarUsuario(gerente);
+            Gerente gerente = usuarioService.cadastrarGerente("Maria Santos", "987.654.321-00", "maria@teste.com", "123456", 1L);
             
             assert gerente != null : "Gerente não deveria ser null";
             assert gerente.getId() != null : "ID do gerente não deveria ser null";
@@ -62,8 +61,7 @@ public class UsuarioServiceTest {
     public void testCadastrarVendedor() {
         System.out.println("\n=== Teste: Cadastrar Vendedor ===");
         try {
-            Vendedor vendedor = new Vendedor("Pedro Costa", "pedro@teste.com", "123456");
-            usuarioService.cadastrarUsuario(vendedor);
+            Vendedor vendedor = usuarioService.cadastrarVendedor("Pedro Costa", "555.666.777-88", "pedro@teste.com", "123456", 1L);
             
             assert vendedor != null : "Vendedor não deveria ser null";
             assert vendedor.getId() != null : "ID do vendedor não deveria ser null";
@@ -86,47 +84,46 @@ public class UsuarioServiceTest {
     public void testValidacaoDadosInvalidos() {
         System.out.println("\n=== Teste: Validação de Dados Inválidos ===");
         
-        // Teste com nome vazio
         try {
-            Dono dono = new Dono("", "teste@teste.com", "123456");
-            usuarioService.cadastrarUsuario(dono);
+            usuarioService.cadastrarDono("", "123.456.789-00", "teste@teste.com", "123456");
             System.out.println("✗ Teste falhou - Deveria ter lançado exceção para nome vazio");
-        } catch (FranquiaException.ValidacaoException e) {
+        } catch (ValidacaoException e) {
             System.out.println("✓ Teste passou - Exceção correta para nome vazio: " + e.getMessage());
         } catch (Exception e) {
             System.out.println("✗ Teste falhou - Exceção incorreta: " + e.getMessage());
         }
         
-        // Teste com email inválido
         try {
-            Dono dono = new Dono("Teste", "email_invalido", "123456");
-            usuarioService.cadastrarUsuario(dono);
+            usuarioService.cadastrarDono("Teste", "123", "teste@teste.com", "123456");
+            System.out.println("✗ Teste falhou - Deveria ter lançado exceção para CPF inválido");
+        } catch (ValidacaoException e) {
+            System.out.println("✓ Teste passou - Exceção correta para CPF inválido: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("✗ Teste falhou - Exceção incorreta: " + e.getMessage());
+        }
+        
+        try {
+            usuarioService.cadastrarDono("Teste", "123.456.789-00", "email_invalido", "123456");
             System.out.println("✗ Teste falhou - Deveria ter lançado exceção para email inválido");
-        } catch (FranquiaException.ValidacaoException e) {
+        } catch (ValidacaoException e) {
             System.out.println("✓ Teste passou - Exceção correta para email inválido: " + e.getMessage());
         } catch (Exception e) {
             System.out.println("✗ Teste falhou - Exceção incorreta: " + e.getMessage());
         }
         
-        // Teste com senha muito curta
         try {
-            Dono dono = new Dono("Teste", "teste@teste.com", "123");
-            usuarioService.cadastrarUsuario(dono);
+            usuarioService.cadastrarDono("Teste", "123.456.789-00", "teste@teste.com", "123");
             System.out.println("✗ Teste falhou - Deveria ter lançado exceção para senha curta");
-        } catch (FranquiaException.ValidacaoException e) {
+        } catch (ValidacaoException e) {
             System.out.println("✓ Teste passou - Exceção correta para senha curta: " + e.getMessage());
         } catch (Exception e) {
             System.out.println("✗ Teste falhou - Exceção incorreta: " + e.getMessage());
         }
     }
     
-    /**
-     * Testa o login no sistema
-     */
     public void testLogin() {
         System.out.println("\n=== Teste: Login ===");
         
-        // Teste com credenciais válidas (usuário padrão)
         try {
             Usuario usuario = usuarioService.login("admin@franquia.com", "admin123");
             
@@ -142,40 +139,30 @@ public class UsuarioServiceTest {
             System.out.println("✗ Teste falhou: " + e.getMessage());
         }
         
-        // Teste com credenciais inválidas
         try {
             usuarioService.login("email@inexistente.com", "senha_errada");
             System.out.println("✗ Teste falhou - Deveria ter lançado exceção para credenciais inválidas");
-        } catch (FranquiaException.AcessoNegadoException e) {
+        } catch (AcessoNegadoException e) {
             System.out.println("✓ Teste passou - Exceção correta para credenciais inválidas: " + e.getMessage());
         } catch (Exception e) {
             System.out.println("✗ Teste falhou - Exceção incorreta: " + e.getMessage());
         }
     }
     
-    /**
-     * Testa polimorfismo com diferentes tipos de usuário
-     */
     public void testPolimorfismo() {
         System.out.println("\n=== Teste: Polimorfismo ===");
         
         try {
-            // Criar usuários de diferentes tipos
-            Dono dono = new Dono("Dono Teste", "dono@teste.com", "123456");
-            usuarioService.cadastrarUsuario(dono);
-            Gerente gerente = new Gerente("Gerente Teste", "gerente@teste.com", "123456");
-            usuarioService.cadastrarUsuario(gerente);
-            Vendedor vendedor = new Vendedor("Vendedor Teste", "vendedor@teste.com", "123456");
-            usuarioService.cadastrarUsuario(vendedor);
+            Dono dono = usuarioService.cadastrarDono("Dono Teste", "111.111.111-11", "dono@teste.com", "123456");
+            Gerente gerente = usuarioService.cadastrarGerente("Gerente Teste", "222.222.222-22", "gerente@teste.com", "123456", 1L);
+            Vendedor vendedor = usuarioService.cadastrarVendedor("Vendedor Teste", "333.333.333-33", "vendedor@teste.com", "123456", 1L);
             
-            // Testar polimorfismo - todos são Usuarios mas comportam-se diferentemente
             Usuario[] usuarios = {dono, gerente, vendedor};
             
             System.out.println("Testando polimorfismo:");
             for (Usuario u : usuarios) {
                 System.out.println("  " + u.getNome() + " é do tipo: " + u.getTipoUsuario());
                 
-                // Cada tipo retorna um valor diferente - polimorfismo
                 assert u.getTipoUsuario() != null : "Tipo de usuário não deveria ser null";
             }
             
@@ -186,9 +173,6 @@ public class UsuarioServiceTest {
         }
     }
     
-    /**
-     * Executa todos os testes
-     */
     public void executarTodosTestes() {
         System.out.println("=================================");
         System.out.println("EXECUTANDO TESTES DO USUARIO SERVICE");
@@ -206,9 +190,6 @@ public class UsuarioServiceTest {
         System.out.println("=================================");
     }
     
-    /**
-     * Método main para executar os testes
-     */
     public static void main(String[] args) {
         UsuarioServiceTest teste = new UsuarioServiceTest();
         teste.executarTodosTestes();

@@ -22,9 +22,10 @@ public class Franquia implements Serializable {
     private double receitaAcumulada;
     private int totalPedidos;
     
-    public Franquia(String nome, Endereco endereco) {
+    public Franquia(String nome, Endereco endereco, Gerente gerente) {
         this.nome = nome;
         this.endereco = endereco;
+        this.gerente = gerente;
         this.vendedores = new ArrayList<>();
         this.produtos = new ArrayList<>();
         this.receitaAcumulada = 0.0;

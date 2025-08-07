@@ -3,14 +3,16 @@
  */
 package br.ufjf.dcc025.trabalho.franquias.test;
 
-import br.ufjf.dcc025.trabalho.franquias.model.usuarios.*;
-import br.ufjf.dcc025.trabalho.franquias.service.*;
-import br.ufjf.dcc025.trabalho.franquias.model.*;
+import br.ufjf.dcc025.trabalho.franquias.exceptions.AcessoNegadoException;
+import br.ufjf.dcc025.trabalho.franquias.exceptions.ValidacaoException;
+import br.ufjf.dcc025.trabalho.franquias.model.franquia.Endereco;
 import br.ufjf.dcc025.trabalho.franquias.model.franquia.Franquia;
+import br.ufjf.dcc025.trabalho.franquias.model.pedido.Cliente;
 import br.ufjf.dcc025.trabalho.franquias.model.pedido.Pedido;
 import br.ufjf.dcc025.trabalho.franquias.model.produto.ItemPedido;
 import br.ufjf.dcc025.trabalho.franquias.model.produto.Produto;
-
+import br.ufjf.dcc025.trabalho.franquias.model.usuarios.*;
+import br.ufjf.dcc025.trabalho.franquias.service.*;
 
 public class DemonstracaoSistema {
     
@@ -40,32 +42,27 @@ public class DemonstracaoSistema {
         System.out.println();
         
         try {
-            // Criação de usuários (Herança)
-            Dono dono = new Dono("João Silva", "joao@franquia.com", "senha123");
+            Dono dono = new Dono("João Silva", "123.456.789-00", "joao@franquia.com", "senha123");
             dono.setId(1L);
             
-            Gerente gerente = new Gerente("Maria Santos", "maria@franquia.com", "senha456");
+            Gerente gerente = new Gerente("Maria Santos", "987.654.321-00", "maria@franquia.com", "senha456", 1L);
             gerente.setId(2L);
             
-            Vendedor vendedor = new Vendedor("Pedro Costa", "pedro@franquia.com", "senha789");
+            Vendedor vendedor = new Vendedor("Pedro Costa", "456.789.123-00", "pedro@franquia.com", "senha789", 1L);
             vendedor.setId(3L);
             
-            // Demonstração de polimorfismo
             Usuario[] usuarios = {dono, gerente, vendedor};
             
             System.out.println("Usuários criados (demonstrando herança):");
             for (Usuario u : usuarios) {
-                // Polimorfismo: mesmo método, comportamentos diferentes
                 System.out.println("- " + u.getNome() + " (" + u.getTipoUsuario() + ")");
             }
             
-            // Demonstração de funcionalidades específicas
             System.out.println("\nPermissões específicas:");
             System.out.println("- Dono pode gerenciar franquias: " + dono.podeGerenciarFranquias());
             System.out.println("- Gerente pode gerenciar vendedores: " + gerente.podeGerenciarVendedores());
             System.out.println("- Vendedor pode cadastrar pedidos: " + vendedor.podeCadastrarPedidos());
             
-            // Vendedor com vendas
             vendedor.adicionarVenda(100.0);
             vendedor.adicionarVenda(200.0);
             System.out.println("- Ticket médio do vendedor: R$ " + String.format("%.2f", vendedor.calcularTicketMedio()));
@@ -85,31 +82,25 @@ public class DemonstracaoSistema {
         try {
             FranquiaService service = new FranquiaService();
             
-            // Criar franquia
-            Gerente gerente = new Gerente("Ana Silva", "ana@test.com", "123456");
-            Franquia franquia = service.cadastrar(
-                "Franquia Centro", 
-                "Rua Principal, 100", 
-                "Juiz de Fora", 
-                "MG", 
-                "36010-000",
-                gerente
+            Gerente gerente = new Gerente("Ana Silva", "111.222.333-44", "ana@test.com", "123456", null);
+            Franquia franquia = service.cadastrar(new Franquia("Franquia Centro", 
+                    new Endereco("Rua Principal, 100", "Juiz de Fora", "MG", "36010-000"),
+                gerente)
             );
             
             System.out.println("Franquia criada:");
             System.out.println("- Nome: " + franquia.getNome());
-            System.out.println("- Endereço: " + franquia.getEnderecoCompleto());
+            System.out.println("- Endereço: " + franquia.getEndereco().toString());
             System.out.println("- Gerente: " + (franquia.getGerente() != null ? franquia.getGerente().getNome() : "Não atribuído"));
             
-            // Simular algumas vendas
-            franquia.registrarVenda(150.0);
-            franquia.registrarVenda(200.0);
-            franquia.registrarVenda(100.0);
+            franquia.adicionarVenda(150.0);
+            franquia.adicionarVenda(200.0);
+            franquia.adicionarVenda(100.0);
             
             System.out.println("\nEstatísticas da franquia:");
             System.out.println("- Total de pedidos: " + franquia.getTotalPedidos());
             System.out.println("- Receita acumulada: R$ " + String.format("%.2f", franquia.getReceitaAcumulada()));
-            System.out.println("- Ticket médio: R$ " + String.format("%.2f", franquia.calcularTicketMedio()));
+            System.out.println("- Ticket médio: R$ " + String.format("%.2f", franquia.getTicketMedio()));
             
         } catch (Exception e) {
             System.err.println("Erro: " + e.getMessage());
@@ -126,13 +117,9 @@ public class DemonstracaoSistema {
         try {
             FranquiaService service = new FranquiaService();
             
-            // Criar produtos
-            Produto pizza = new Produto("Pizza Margherita", "Pizza com queijo e tomate", 25.90, 10);
-            service.cadastrarProduto(pizza);
-            Produto hamburguer = new Produto("Hambúrguer Clássico", "Hambúrguer com carne, alface e tomate", 18.50, 2);
-            service.cadastrarProduto(hamburguer);
-            Produto refrigerante = new Produto("Coca-Cola 350ml", "Refrigerante de cola", 5.90, 20);
-            service.cadastrarProduto(refrigerante);
+            Produto pizza = service.cadastrarProduto("Pizza Margherita", "Pizza com queijo e tomate", 25.90, 10, 3, "Alimentação");
+            Produto hamburguer = service.cadastrarProduto("Hambúrguer Clássico", "Hambúrguer com carne, alface e tomate", 18.50, 2, 5, "Alimentação");
+            Produto refrigerante = service.cadastrarProduto("Coca-Cola 350ml", "Refrigerante de cola", 5.90, 20, 10, "Bebida");
             
             System.out.println("Produtos cadastrados:");
             for (Produto p : service.listarProdutos()) {
@@ -140,12 +127,10 @@ public class DemonstracaoSistema {
                                  " (Estoque: " + p.getEstoque() + ")");
             }
             
-            // Testar funcionalidades de estoque
             System.out.println("\nTeste de redução de estoque:");
             boolean reduziu = pizza.reduzirEstoque(3);
             System.out.println("- Reduziu 3 pizzas: " + reduziu + " (estoque atual: " + pizza.getEstoque() + ")");
             
-            // Produtos com estoque baixo
             System.out.println("\nProdutos com estoque baixo:");
             for (Produto p : service.listarProdutosEstoqueBaixo()) {
                 System.out.println("- " + p.getNome() + " (estoque: " + p.getEstoque() + 
@@ -165,23 +150,24 @@ public class DemonstracaoSistema {
         System.out.println();
         
         try {
-            // Criar vendedor e produtos
-            Vendedor vendedor = new Vendedor("Carlos Lima", "carlos@test.com", "123456");
+            Vendedor vendedor = new Vendedor("Carlos Lima", "777.888.999-00", "carlos@test.com", "123456", 1L);
             vendedor.setId(10L);
             
-            Produto pizza = new Produto("Pizza", "Pizza Margherita", 25.90, 10);
+            Produto pizza = new Produto("Pizza", "Pizza Margherita", 25.90, 10, 2, "Alimentação");
             pizza.setId(1L);
             
-            Produto refrigerante = new Produto("Refrigerante", "Coca-Cola", 5.90, 20);
+            Produto refrigerante = new Produto("Refrigerante", "Coca-Cola", 5.90, 20, 5, "Bebida");
             refrigerante.setId(2L);
             
-            // Criar pedido
-            Pedido pedido = new Pedido("João da Silva", vendedor, 1L);
+            Gerente gerente = new Gerente("Ana Silva", "111.222.333-44", "ana@test.com", "123456", null);;
+            Franquia franquia = new Franquia("Teste", new Endereco("Rua", "jf", "mg", "00000-000"), gerente);
+            Pedido pedido = new Pedido(new Cliente("João da Silva", "000.000.000-00", "99999-9999", new Endereco("Rua", "sp", "sp", "00000-000")), 
+                    vendedor, franquia);
+            
             pedido.setFormaPagamento("Cartão de Crédito");
             pedido.setModalidadeEntrega("Balcão");
             pedido.setTaxaServico(2.00);
             
-            // Adicionar itens
             pedido.adicionarItem(new ItemPedido(pizza, 2));
             pedido.adicionarItem(new ItemPedido(refrigerante, 3));
             
@@ -201,7 +187,7 @@ public class DemonstracaoSistema {
             System.out.println("\nTotais:");
             System.out.println("- Subtotal: R$ " + String.format("%.2f", pedido.getSubtotal()));
             System.out.println("- Taxa de serviço: R$ " + String.format("%.2f", pedido.getTaxaServico()));
-            System.out.println("- Total: R$ " + String.format("%.2f", pedido.getTotal()));
+            System.out.println("- Total: R$ " + String.format("%.2f", pedido.getValorTotal()));
             
         } catch (Exception e) {
             System.err.println("Erro: " + e.getMessage());
@@ -246,20 +232,25 @@ public class DemonstracaoSistema {
         
         UsuarioService userService = new UsuarioService();
         
-        // Teste de validação de nome vazio
         try {
-            Dono dono = new Dono("", "test@email.com", "123456") {};
-            userService.cadastrarUsuario(dono);
-        } catch (FranquiaException.ValidacaoException e) {
+            userService.cadastrarDono("", "123.456.789-00", "test@email.com", "123456");
+        } catch (ValidacaoException e) {
             System.out.println("✓ Exceção capturada - Nome vazio: " + e.getMessage());
         } catch (Exception e) {
             System.out.println("✗ Exceção incorreta: " + e.getMessage());
         }
-                
-        // Teste de login com credenciais inválidas
+        
+        try {
+            userService.cadastrarDono("Teste", "123", "test@email.com", "123456");
+        } catch (ValidacaoException e) {
+            System.out.println("✓ Exceção capturada - CPF inválido: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("✗ Exceção incorreta: " + e.getMessage());
+        }
+        
         try {
             userService.login("usuario@inexistente.com", "senhaErrada");
-        } catch (FranquiaException.AcessoNegadoException e) {
+        } catch (AcessoNegadoException e) {
             System.out.println("✓ Exceção capturada - Login inválido: " + e.getMessage());
         } catch (Exception e) {
             System.out.println("✗ Exceção incorreta: " + e.getMessage());

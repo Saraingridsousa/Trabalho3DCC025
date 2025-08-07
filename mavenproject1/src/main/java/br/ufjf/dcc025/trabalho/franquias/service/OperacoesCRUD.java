@@ -11,7 +11,7 @@ public interface OperacoesCRUD<T, ID> {
     
     T cadastrar(T entidade) throws ValidacaoException;
     
-    T buscarPorId(ID id);
+    T buscarPorId(Long id);
     
     List<T> listar();
     
