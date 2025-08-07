@@ -4,6 +4,7 @@ import br.ufjf.dcc025.trabalho.franquias.model.franquia.Franquia;
 import br.ufjf.dcc025.trabalho.franquias.model.franquia.Endereco;
 import br.ufjf.dcc025.trabalho.franquias.exceptions.ValidacaoException;
 import br.ufjf.dcc025.trabalho.franquias.exceptions.EntidadeNaoEncontradaException;
+import br.ufjf.dcc025.trabalho.franquias.model.produto.Produto;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.stream.Collectors;
 
 public class FranquiaService implements OperacoesCRUD<Franquia, Long> {
     private static final String ARQUIVO_FRANQUIAS = "franquias.dat";
+    private final ProdutoService produtoService = new ProdutoService();
     
     private List<Franquia> franquias;
     private Long proximoId = 1L;
@@ -183,5 +185,13 @@ public class FranquiaService implements OperacoesCRUD<Franquia, Long> {
         } catch (IOException e) {
             System.err.println("Erro ao salvar franquias: " + e.getMessage());
         }
+    }
+
+    public void cadastrarProduto(Produto produto) throws ValidacaoException {
+        produtoService.cadastrar(produto);
+    }
+
+    public List<Produto> listarProdutos() {
+        return produtoService.listar();
     }
 }
