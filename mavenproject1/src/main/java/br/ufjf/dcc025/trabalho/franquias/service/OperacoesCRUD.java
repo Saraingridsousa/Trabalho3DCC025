@@ -1,3 +1,6 @@
+/*
+ * Autores: Sara Ingrid - 202365056A, Angélica Coutinho - 202365064A
+ */
 package br.ufjf.dcc025.trabalho.franquias.service;
 
 import br.ufjf.dcc025.trabalho.franquias.exceptions.ValidacaoException;
@@ -12,7 +15,7 @@ public interface OperacoesCRUD<T, ID> {
     
     List<T> listar();
     
-    T atualizar(ID id, T entidade) throws ValidacaoException, EntidadeNaoEncontradaException;
+    T atualizar(T entidade) throws ValidacaoException, EntidadeNaoEncontradaException;
     
     boolean remover(ID id) throws ValidacaoException, EntidadeNaoEncontradaException;
 }

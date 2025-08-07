@@ -1,3 +1,6 @@
+/*
+ * Autores: Sara Ingrid - 202365056A, Angélica Coutinho - 202365064A
+ */
 package br.ufjf.dcc025.trabalho.franquias.service;
 
 import br.ufjf.dcc025.trabalho.franquias.model.franquia.Franquia;
@@ -37,15 +40,15 @@ public class FranquiaService implements OperacoesCRUD<Franquia, Long> {
     }
     
     @Override
-    public Franquia atualizar(Long id, Franquia franquia) throws ValidacaoException, EntidadeNaoEncontradaException {
-        Franquia franquiaExistente = buscarPorId(id);
+    public Franquia atualizar(Franquia franquia) throws ValidacaoException, EntidadeNaoEncontradaException {
+        Franquia franquiaExistente = buscarPorId(franquia.getId());
         if (franquiaExistente == null) {
-            throw new EntidadeNaoEncontradaException("Franquia com ID " + id + " não encontrada");
+            throw new EntidadeNaoEncontradaException("Franquia com ID " + franquia.getId() + " não encontrada");
         }
 
         validarFranquia(franquia);
 
-        if (existeNomeParaOutraFranquia(franquia.getNome(), id)) {
+        if (existeNomeParaOutraFranquia(franquia.getNome(), franquia.getId())) {
             throw new ValidacaoException("Já existe uma franquia com este nome");
         }
 
@@ -64,9 +67,11 @@ public class FranquiaService implements OperacoesCRUD<Franquia, Long> {
             throw new EntidadeNaoEncontradaException("Franquia com ID " + id + " não encontrada");
         }
 
-        franquias.remove(franquia);
-        salvarFranquias();
-        return true;
+        boolean removida = franquias.remove(franquia);
+        if (removida) {
+            salvarFranquias();
+        }
+        return removida;
     }
     
     @Override
@@ -106,7 +111,7 @@ public class FranquiaService implements OperacoesCRUD<Franquia, Long> {
             throw new EntidadeNaoEncontradaException("Franquia com ID " + franquiaId + " não encontrada");
         }
         
-        franquia.adicionarReceita(valor);
+        franquia.adicionarVenda(valor);
         salvarFranquias();
     }
     

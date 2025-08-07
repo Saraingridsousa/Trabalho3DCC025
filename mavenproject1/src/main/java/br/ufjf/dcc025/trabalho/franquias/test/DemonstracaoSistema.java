@@ -1,5 +1,5 @@
 /*
- * Autores: Sara Ingrid - 202376049, Angélica Coutinho - 202376046
+ * Autores: Sara Ingrid - 202365056A, Angélica Coutinho - 202365064A
  */
 package br.ufjf.dcc025.trabalho.franquias.test;
 
@@ -11,10 +11,7 @@ import br.ufjf.dcc025.trabalho.franquias.model.pedido.Pedido;
 import br.ufjf.dcc025.trabalho.franquias.model.produto.ItemPedido;
 import br.ufjf.dcc025.trabalho.franquias.model.produto.Produto;
 
-/**
- * Classe para demonstrar todas as funcionalidades implementadas no sistema
- * Serve como documentação executável dos recursos disponíveis
- */
+
 public class DemonstracaoSistema {
     
     public static void executarDemonstracao() {

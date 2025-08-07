@@ -1,3 +1,6 @@
+/*
+ * Autores: Sara Ingrid - 202365056A, Angélica Coutinho - 202365064A
+ */
 package br.ufjf.dcc025.trabalho.franquias.service;
 
 import br.ufjf.dcc025.trabalho.franquias.model.produto.Produto;
@@ -34,15 +37,15 @@ public class ProdutoService implements OperacoesCRUD<Produto, Long> {
     }
     
     @Override
-    public Produto atualizar(Long id, Produto produto) throws ValidacaoException, EntidadeNaoEncontradaException {
-        Produto produtoExistente = buscarPorId(id);
+    public Produto atualizar(Produto produto) throws ValidacaoException, EntidadeNaoEncontradaException {
+        Produto produtoExistente = buscarPorId(produto.getId());
         if (produtoExistente == null) {
-            throw new EntidadeNaoEncontradaException("Produto com ID " + id + " não encontrado");
+            throw new EntidadeNaoEncontradaException("Produto com ID " + produto.getId() + " não encontrado");
         }
         
         validarProduto(produto);
         
-        if (existeNomeParaOutroProduto(produto.getNome(), id)) {
+        if (existeNomeParaOutroProduto(produto.getNome(), produto.getId())) {
             throw new ValidacaoException("Já existe um produto com este nome");
         }
         
@@ -85,13 +88,7 @@ public class ProdutoService implements OperacoesCRUD<Produto, Long> {
                 .filter(p -> p.getNome().toLowerCase().contains(nome.toLowerCase()))
                 .collect(Collectors.toList());
     }
-    
-    public List<Produto> buscarDisponiveis() {
-        return produtos.stream()
-                .filter(Produto::isDisponivel)
-                .collect(Collectors.toList());
-    }
-    
+        
     public List<Produto> buscarComEstoqueBaixo(int limiteMinimo) {
         return produtos.stream()
                 .filter(p -> p.getEstoque() <= limiteMinimo)
@@ -104,7 +101,6 @@ public class ProdutoService implements OperacoesCRUD<Produto, Long> {
                 .collect(Collectors.toList());
     }
     
-    // Métodos de controle de estoque
     public boolean atualizarEstoque(Long produtoId, int novaQuantidade) throws EntidadeNaoEncontradaException, ValidacaoException {
         Produto produto = buscarPorId(produtoId);
         if (produto == null) {
@@ -160,10 +156,9 @@ public class ProdutoService implements OperacoesCRUD<Produto, Long> {
             throw new EntidadeNaoEncontradaException("Produto com ID " + produtoId + " não encontrado");
         }
         
-        return produto.isDisponivel() && produto.getEstoque() >= quantidadeDesejada;
+        return produto.isDisponivel(quantidadeDesejada) && produto.getEstoque() >= quantidadeDesejada;
     }
     
-    // Métodos estatísticos
     public double getValorTotalEstoque() {
         return produtos.stream()
                 .mapToDouble(p -> p.getPreco() * p.getEstoque())
@@ -208,8 +203,7 @@ public class ProdutoService implements OperacoesCRUD<Produto, Long> {
             produtos = (List<Produto>) ois.readObject();
             proximoId = (Long) ois.readObject();
         } catch (IOException | ClassNotFoundException e) {
-            // Arquivo não existe, criar dados de exemplo
-            criarDadosExemplo();
+            criarProdutosPadrao();
         }
     }
     
@@ -222,14 +216,15 @@ public class ProdutoService implements OperacoesCRUD<Produto, Long> {
         }
     }
     
-    private void criarDadosExemplo() {
+    private void criarProdutosPadrao() {
         try {
-            cadastrar(new Produto("Hambúrguer Classic", "Hambúrguer com carne, alface, tomate e queijo", 25.90, 50));
-            cadastrar(new Produto("Pizza Margherita", "Pizza com molho de tomate, mussarela e manjericão", 45.90, 30));
-            cadastrar(new Produto("Refrigerante Lata", "Refrigerante 350ml", 5.50, 100));
-            cadastrar(new Produto("Batata Frita", "Porção individual de batata frita", 12.90, 40));
+            cadastrar(new Produto("Hambúrguer Clássico", "Hambúrguer com carne, alface, tomate e queijo", 15.90, 50, 10, "Hambúrgueres"));
+            cadastrar(new Produto("Batata Frita", "Porção de batata frita crocante", 8.50, 30, 5, "Acompanhamentos"));
+            cadastrar(new Produto("Refrigerante Lata", "Refrigerante gelado 350ml", 4.50, 100, 20, "Bebidas"));
+            cadastrar(new Produto("Pizza Margherita", "Pizza com molho de tomate, mussarela e manjericão", 22.90, 20, 3, "Pizzas"));
+            cadastrar(new Produto("Sorvete Chocolate", "Sorvete cremoso sabor chocolate", 6.90, 25, 5, "Sobremesas"));
         } catch (ValidacaoException e) {
-            System.err.println("Erro ao criar dados de exemplo: " + e.getMessage());
+            System.err.println("Erro ao criar produtos padrão: " + e.getMessage());
         }
     }
 }

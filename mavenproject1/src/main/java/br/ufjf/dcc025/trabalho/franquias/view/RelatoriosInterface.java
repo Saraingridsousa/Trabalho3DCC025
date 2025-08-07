@@ -1,3 +1,6 @@
+/*
+ * Autores: Sara Ingrid - 202365056A, Angélica Coutinho - 202365064A
+ */
 package br.ufjf.dcc025.trabalho.franquias.view;
 
 import br.ufjf.dcc025.trabalho.franquias.model.produto.Produto;
@@ -137,8 +140,8 @@ public class RelatoriosInterface extends JFrame {
         
         btnTodosPedidos.addActionListener(e -> carregarVendas(null));
         btnPendentes.addActionListener(e -> carregarVendas(Pedido.StatusPedido.PENDENTE));
-        btnConfirmados.addActionListener(e -> carregarVendas(Pedido.StatusPedido.CONFIRMADO));
-        btnEntregues.addActionListener(e -> carregarVendas(Pedido.StatusPedido.FINALIZADO));
+        btnConfirmados.addActionListener(e -> carregarVendas(Pedido.StatusPedido.APROVADO));
+        btnEntregues.addActionListener(e -> carregarVendas(Pedido.StatusPedido.ENTREGUE));
         btnCancelados.addActionListener(e -> carregarVendas(Pedido.StatusPedido.CANCELADO));
         
         filterPanel.add(btnTodosPedidos);

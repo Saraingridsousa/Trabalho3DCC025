@@ -1,3 +1,6 @@
+/*
+ * Autores: Sara Ingrid - 202365056A, Angélica Coutinho - 202365064A
+ */
 package br.ufjf.dcc025.trabalho.franquias.service;
 
 import br.ufjf.dcc025.trabalho.franquias.model.pedido.Pedido;
@@ -40,10 +43,10 @@ public class PedidoService implements OperacoesCRUD<Pedido, Long> {
     }
     
     @Override
-    public Pedido atualizar(Long id, Pedido pedido) throws ValidacaoException, EntidadeNaoEncontradaException {
-        Pedido pedidoExistente = buscarPorId(id);
+    public Pedido atualizar(Pedido pedido) throws ValidacaoException, EntidadeNaoEncontradaException {
+        Pedido pedidoExistente = buscarPorId(pedido.getId());
         if (pedidoExistente == null) {
-            throw new EntidadeNaoEncontradaException("Pedido com ID " + id + " não encontrado");
+            throw new EntidadeNaoEncontradaException("Pedido com ID " + pedido.getId() + " não encontrado");
         }
         
         // Só permite alterar pedidos pendentes
@@ -113,7 +116,7 @@ public class PedidoService implements OperacoesCRUD<Pedido, Long> {
         franquiaService.adicionarReceita(pedido.getFranquia().getId(), pedido.getTotal());
         franquiaService.atualizarTickets(pedido.getFranquia().getId(), 1);
         
-        pedido.setStatus(Pedido.StatusPedido.CONFIRMADO);
+        pedido.setStatus(Pedido.StatusPedido.APROVADO);
         salvarPedidos();
         return pedido;
     }
@@ -124,11 +127,11 @@ public class PedidoService implements OperacoesCRUD<Pedido, Long> {
             throw new EntidadeNaoEncontradaException("Pedido com ID " + pedidoId + " não encontrado");
         }
         
-        if (pedido.getStatus() != Pedido.StatusPedido.CONFIRMADO) {
+        if (pedido.getStatus() != Pedido.StatusPedido.APROVADO) {
             throw new ValidacaoException("Só é possível entregar pedidos confirmados");
         }
         
-        pedido.setStatus(Pedido.StatusPedido.FINALIZADO);
+        pedido.setStatus(Pedido.StatusPedido.ENTREGUE);
         pedido.setDataFinalizacao(LocalDateTime.now());
         salvarPedidos();
         return pedido;
@@ -140,11 +143,11 @@ public class PedidoService implements OperacoesCRUD<Pedido, Long> {
             throw new EntidadeNaoEncontradaException("Pedido com ID " + pedidoId + " não encontrado");
         }
         
-        if (pedido.getStatus() == Pedido.StatusPedido.FINALIZADO) {
+        if (pedido.getStatus() == Pedido.StatusPedido.ENTREGUE) {
             throw new ValidacaoException("Não é possível cancelar pedidos já entregues");
         }
         
-        if (pedido.getStatus() == Pedido.StatusPedido.CONFIRMADO) {
+        if (pedido.getStatus() == Pedido.StatusPedido.APROVADO) {
             for (ItemPedido item : pedido.getItens()) {
                 try {
                     produtoService.adicionarEstoque(item.getProduto().getId(), item.getQuantidade());
@@ -192,28 +195,28 @@ public class PedidoService implements OperacoesCRUD<Pedido, Long> {
     // Relatórios e estatísticas
     public double getReceitaTotal() {
         return pedidos.stream()
-                .filter(p -> p.getStatus() == Pedido.StatusPedido.FINALIZADO)
+                .filter(p -> p.getStatus() == Pedido.StatusPedido.ENTREGUE)
                 .mapToDouble(Pedido::getTotal)
                 .sum();
     }
     
     public double getReceitaPorFranquia(Long franquiaId) {
         return pedidos.stream()
-                .filter(p -> p.getFranquia().getId().equals(franquiaId) && p.getStatus() == Pedido.StatusPedido.FINALIZADO)
+                .filter(p -> p.getFranquia().getId().equals(franquiaId) && p.getStatus() == Pedido.StatusPedido.ENTREGUE)
                 .mapToDouble(Pedido::getTotal)
                 .sum();
     }
     
     public double getReceitaPorVendedor(Long vendedorId) {
         return pedidos.stream()
-                .filter(p -> p.getVendedor().getId().equals(vendedorId) && p.getStatus() == Pedido.StatusPedido.FINALIZADO)
+                .filter(p -> p.getVendedor().getId().equals(vendedorId) && p.getStatus() == Pedido.StatusPedido.ENTREGUE)
                 .mapToDouble(Pedido::getTotal)
                 .sum();
     }
     
     public long getQuantidadePedidosEntregues() {
         return pedidos.stream()
-                .filter(p -> p.getStatus() == Pedido.StatusPedido.FINALIZADO)
+                .filter(p -> p.getStatus() == Pedido.StatusPedido.ENTREGUE)
                 .count();
     }
     

@@ -1,5 +1,5 @@
 /*
- * Autores: Sara Ingrid - 202376049, Angélica Coutinho - 202376046
+ * Autores: Sara Ingrid - 202365056A, Angélica Coutinho - 202365064A
  */
 package br.ufjf.dcc025.trabalho.franquias.test;
 
@@ -15,9 +15,6 @@ public class UsuarioServiceTest {
         this.usuarioService = new UsuarioService();
     }
     
-    /**
-     * Testa o cadastro de um Dono
-     */
     public void testCadastrarDono() {
         System.out.println("=== Teste: Cadastrar Dono ===");
         try {
@@ -39,9 +36,6 @@ public class UsuarioServiceTest {
         }
     }
     
-    /**
-     * Testa o cadastro de um Gerente
-     */
     public void testCadastrarGerente() {
         System.out.println("\n=== Teste: Cadastrar Gerente ===");
         try {
@@ -65,9 +59,6 @@ public class UsuarioServiceTest {
         }
     }
     
-    /**
-     * Testa o cadastro de um Vendedor
-     */
     public void testCadastrarVendedor() {
         System.out.println("\n=== Teste: Cadastrar Vendedor ===");
         try {
@@ -79,7 +70,7 @@ public class UsuarioServiceTest {
             assert "Pedro Costa".equals(vendedor.getNome()) : "Nome incorreto";
             assert "VENDEDOR".equals(vendedor.getTipoUsuario()) : "Tipo de usuário incorreto";
             assert vendedor.getFranquiaId().equals(1L) : "ID da franquia incorreto";
-            //assert vendedor.getTotalVendas() == 0.0 : "Total de vendas deveria ser 0";
+            assert vendedor.getTotalVendas() == 0.0 : "Total de vendas deveria ser 0";
             
             System.out.println("✓ Teste passou - Vendedor cadastrado com sucesso");
             System.out.println("  ID: " + vendedor.getId());
@@ -92,9 +83,6 @@ public class UsuarioServiceTest {
         }
     }
     
-    /**
-     * Testa validação de dados inválidos
-     */
     public void testValidacaoDadosInvalidos() {
         System.out.println("\n=== Teste: Validação de Dados Inválidos ===");
         

@@ -1,3 +1,6 @@
+/*
+ * Autores: Sara Ingrid - 202365056A, Angélica Coutinho - 202365064A
+ */
 package br.ufjf.dcc025.trabalho.franquias.model.franquia;
 
 import java.io.Serializable;
@@ -15,38 +18,36 @@ public class Endereco implements Serializable {
         this.cep = cep;
     }
     
-    // Método para formatar endereço completo
     public String getEnderecoCompleto() {
         return logradouro + ", " + cidade + " - " + estado + ", " + cep;
     }
     
-    // Getters e Setters
     public String getLogradouro() {
         return logradouro;
-    }
-    
-    public void setLogradouro(String logradouro) {
-        this.logradouro = logradouro;
     }
     
     public String getCidade() {
         return cidade;
     }
     
-    public void setCidade(String cidade) {
-        this.cidade = cidade;
-    }
-    
     public String getEstado() {
         return estado;
     }
     
-    public void setEstado(String estado) {
-        this.estado = estado;
-    }
-    
     public String getCep() {
         return cep;
+    }
+    
+    public void setLogradouro(String logradouro) {
+        this.logradouro = logradouro;
+    }
+    
+    public void setCidade(String cidade) {
+        this.cidade = cidade;
+    }
+    
+    public void setEstado(String estado) {
+        this.estado = estado;
     }
     
     public void setCep(String cep) {
