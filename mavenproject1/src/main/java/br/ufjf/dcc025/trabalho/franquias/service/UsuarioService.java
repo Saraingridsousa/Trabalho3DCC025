@@ -5,8 +5,8 @@ package br.ufjf.dcc025.trabalho.franquias.service;
 
 import br.ufjf.dcc025.trabalho.franquias.exceptions.AcessoNegadoException;
 import br.ufjf.dcc025.trabalho.franquias.exceptions.EntidadeNaoEncontradaException;
-import br.ufjf.dcc025.trabalho.franquias.exceptions.ValidacaoException;
 import br.ufjf.dcc025.trabalho.franquias.exceptions.FranquiaException;
+import br.ufjf.dcc025.trabalho.franquias.exceptions.ValidacaoException;
 import br.ufjf.dcc025.trabalho.franquias.model.pedido.Pedido;
 import br.ufjf.dcc025.trabalho.franquias.model.usuarios.*;
 import java.io.*;
@@ -181,7 +181,7 @@ public class UsuarioService {
     }
     
     public List<Vendedor> listarVendedores() {
-        recalcularVendasVendedores(); 
+        recalcularVendasVendedores();
         return usuarios.stream()
                 .filter(u -> u instanceof Vendedor)
                 .map(u -> (Vendedor) u)
@@ -189,7 +189,7 @@ public class UsuarioService {
     }
     
     public List<Vendedor> listarVendedoresPorFranquia(Long franquiaId) {
-        recalcularVendasVendedores(); 
+        recalcularVendasVendedores();
         return usuarios.stream()
                 .filter(u -> u instanceof Vendedor)
                 .map(u -> (Vendedor) u)
@@ -297,7 +297,6 @@ public class UsuarioService {
             throw new ValidacaoException("Vendedor inválido");
         }
         
-        // Encontrar o vendedor na lista e atualizar
         for (int i = 0; i < usuarios.size(); i++) {
             Usuario usuario = usuarios.get(i);
             if (usuario.getId().equals(vendedor.getId()) && usuario instanceof Vendedor) {
@@ -343,7 +342,7 @@ public class UsuarioService {
                 Usuario usuario = buscarUsuarioPorId(vendedorId);
                 if (usuario instanceof Vendedor) {
                     Vendedor vendedor = (Vendedor) usuario;
-                    vendedor.adicionarVenda(pedido.getValorTotal());
+                    vendedor.adicionarVenda(pedido.getTotal());
                 }
             }
             

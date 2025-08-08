@@ -44,19 +44,20 @@ public class FranquiaService {
     
     // ========== MÉTODOS DE FRANQUIA ==========
     
-    public Franquia cadastrar(Franquia franquia) 
+    public Franquia cadastrarFranquia(String nome, String endereco, String cidade, String estado, String cep, Gerente gerente) 
             throws ValidacaoException {
-        validarDadosFranquia(franquia.getNome(), franquia.getEndereco().getLogradouro(), 
-                franquia.getEndereco().getCidade(), franquia.getEndereco().getEstado(), franquia.getEndereco().getCep());
+        validarDadosFranquia(nome, endereco, cidade, estado, cep);
         
+        Franquia franquia = new Franquia(nome, new Endereco(endereco, cidade, estado, cep));
         franquia.setId(proximoIdFranquia++);
+        franquia.setGerente(gerente);
         
-        if (franquia.getGerente() != null) {
-            franquia.getGerente().setFranquiaId(franquia.getId());
+        if (gerente != null) {
+            gerente.setFranquiaId(franquia.getId());
             
             try {
-                usuarioService.editarUsuario(franquia.getGerente().getId(), franquia.getGerente().getNome(), franquia.getGerente().getEmail());
-                usuarioService.atualizarFranquiaIdGerente(franquia.getGerente().getId(), franquia.getId());
+                usuarioService.editarUsuario(gerente.getId(), gerente.getNome(), gerente.getEmail());
+                usuarioService.atualizarFranquiaIdGerente(gerente.getId(), franquia.getId());
             } catch (Exception e) {
                 System.err.println("Erro ao sincronizar gerente com franquia: " + e.getMessage());
             }
@@ -67,7 +68,7 @@ public class FranquiaService {
         return franquia;
     }
     
-    public boolean remover(Long id) throws EntidadeNaoEncontradaException {
+    public boolean removerFranquia(Long id) throws EntidadeNaoEncontradaException {
         Franquia franquia = buscarFranquiaPorId(id);
         if (franquia == null) {
             throw new EntidadeNaoEncontradaException("Franquia", id);
@@ -80,7 +81,7 @@ public class FranquiaService {
         return removida;
     }
     
-    public void atualizar(Franquia franquia) throws FranquiaException {
+    public void atualizarFranquia(Franquia franquia) throws FranquiaException {
         if (franquia == null || franquia.getId() == null) {
             throw new ValidacaoException("Franquia inválida");
         }
@@ -96,7 +97,7 @@ public class FranquiaService {
         throw new EntidadeNaoEncontradaException("Franquia", franquia.getId());
     }
     
-    public List<Franquia> listar() {
+    public List<Franquia> listarFranquias() {
         return new ArrayList<>(franquias);
     }
     
@@ -148,14 +149,13 @@ public class FranquiaService {
         pedido.setId(proximoIdPedido++);
         pedidos.add(pedido);
         
-        // Atualizar estatísticas da franquia e vendedor
-        Franquia franquia = buscarFranquiaPorId(pedido.getFranquia().getId());
+        Franquia franquia = buscarFranquiaPorId(pedido.getFranquiaId());
         if (franquia != null) {
-            franquia.adicionarVenda(pedido.getValorTotal());
+            franquia.registrarVenda(pedido.getTotal());
         }
         
         if (pedido.getVendedor() != null) {
-            pedido.getVendedor().adicionarVenda(pedido.getValorTotal());
+            pedido.getVendedor().adicionarVenda(pedido.getTotal());
         }
         
         salvarPedidos();
@@ -165,7 +165,7 @@ public class FranquiaService {
     
     public List<Pedido> listarPedidosPorFranquia(Long franquiaId) {
         return pedidos.stream()
-                .filter(p -> p.getFranquia().getId().equals(franquiaId))
+                .filter(p -> p.getFranquiaId().equals(franquiaId))
                 .collect(Collectors.toList());
     }
     
@@ -196,7 +196,7 @@ public class FranquiaService {
             relatorio.put("franquia", franquia);
             relatorio.put("faturamentoBruto", franquia.getReceitaAcumulada());
             relatorio.put("totalPedidos", franquia.getTotalPedidos());
-            relatorio.put("ticketMedio", franquia.getTicketMedio());
+            relatorio.put("ticketMedio", franquia.calcularTicketMedio());
             relatorio.put("rankingVendedores", getRankingVendedores(franquiaId));
         }
         

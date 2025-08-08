@@ -23,32 +23,36 @@ public class ProdutoService {
     
     // ========== MÉTODOS CRUD ==========
     
-    public Produto cadastrar(Produto produto) 
+    public Produto cadastrarProduto(String nome, String descricao, double preco, 
+                                  int quantidadeEstoque, int estoqueMinimo, String categoria) 
             throws ValidacaoException {
         
-        if (produto.getNome() == null || produto.getNome().trim().isEmpty()) {
+        if (nome == null || nome.trim().isEmpty()) {
             throw new ValidacaoException("Nome do produto é obrigatório");
         }
         
-        if (produto.getPreco() <= 0) {
+        if (preco <= 0) {
             throw new ValidacaoException("Preço deve ser maior que zero");
         }
         
-        if (produto.getEstoque() < 0) {
+        if (quantidadeEstoque < 0) {
             throw new ValidacaoException("Quantidade em estoque não pode ser negativa");
         }
         
-        if (produto.getEstoqueMinimo() < 0) {
+        if (estoqueMinimo < 0) {
             throw new ValidacaoException("Estoque mínimo não pode ser negativo");
         }
         
         boolean existe = produtos.stream()
-                .anyMatch(p -> p.getNome().trim().equalsIgnoreCase(produto.getNome().trim()));
+                .anyMatch(p -> p.getNome().trim().equalsIgnoreCase(nome.trim()));
         
         if (existe) {
             throw new ValidacaoException("Já existe um produto com este nome");
         }
         
+        Produto produto = new Produto(nome.trim(), descricao != null ? descricao.trim() : "", 
+                                    preco, quantidadeEstoque, estoqueMinimo, 
+                                    categoria != null ? categoria.trim() : "Geral");
         produto.setId(proximoId++);
         
         produtos.add(produto);
@@ -96,7 +100,7 @@ public class ProdutoService {
         return true;
     }
     
-    public boolean remover(Long id) throws EntidadeNaoEncontradaException {
+    public boolean removerProduto(Long id) throws EntidadeNaoEncontradaException {
         Produto produto = buscarProdutoPorId(id);
         if (produto == null) {
             throw new EntidadeNaoEncontradaException("Produto não encontrado");
@@ -179,11 +183,11 @@ public class ProdutoService {
     private void criarProdutosPadrao() {
         if (produtos.isEmpty()) {
             try {
-                cadastrar(new Produto("Hambúrguer Clássico", "Hambúrguer com carne, alface, tomate e queijo", 15.90, 50, 10, "Hambúrgueres"));
-                cadastrar(new Produto("Batata Frita", "Porção de batata frita crocante", 8.50, 30, 5, "Acompanhamentos"));
-                cadastrar(new Produto("Refrigerante Lata", "Refrigerante gelado 350ml", 4.50, 100, 20, "Bebidas"));
-                cadastrar(new Produto("Pizza Margherita", "Pizza com molho de tomate, mussarela e manjericão", 22.90, 20, 3, "Pizzas"));
-                cadastrar(new Produto("Sorvete Chocolate", "Sorvete cremoso sabor chocolate", 6.90, 25, 5, "Sobremesas"));
+                cadastrarProduto("Hambúrguer Clássico", "Hambúrguer com carne, alface, tomate e queijo", 15.90, 50, 10, "Hambúrgueres");
+                cadastrarProduto("Batata Frita", "Porção de batata frita crocante", 8.50, 30, 5, "Acompanhamentos");
+                cadastrarProduto("Refrigerante Lata", "Refrigerante gelado 350ml", 4.50, 100, 20, "Bebidas");
+                cadastrarProduto("Pizza Margherita", "Pizza com molho de tomate, mussarela e manjericão", 22.90, 20, 3, "Pizzas");
+                cadastrarProduto("Sorvete Chocolate", "Sorvete cremoso sabor chocolate", 6.90, 25, 5, "Sobremesas");
             } catch (Exception e) {
                 System.err.println("Erro ao criar produtos padrão: " + e.getMessage());
             }

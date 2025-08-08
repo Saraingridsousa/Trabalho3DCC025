@@ -16,29 +16,117 @@ public class Franquia implements Serializable {
     private Long id;
     private String nome;
     private Endereco endereco;
+    private String cidade;
+    private String estado;
+    private String cep;
     private Gerente gerente;
     private List<Vendedor> vendedores;
     private List<Produto> produtos;
     private double receitaAcumulada;
     private int totalPedidos;
     
-    public Franquia(String nome, Endereco endereco, Gerente gerente) {
-        this.nome = nome;
-        this.endereco = endereco;
-        this.gerente = gerente;
+    public Franquia() {
         this.vendedores = new ArrayList<>();
         this.produtos = new ArrayList<>();
         this.receitaAcumulada = 0.0;
         this.totalPedidos = 0;
     }
     
-    public double getTicketMedio() {
-        return totalPedidos == 0 ? 0.0 : receitaAcumulada / totalPedidos;
+    public Franquia(String nome, Endereco endereco) {
+        this();
+        this.nome = nome;
+        this.endereco = endereco;
+        this.cidade = endereco.getCidade();
+        this.estado = endereco.getEstado();
+        this.cep = endereco.getCep();
     }
-    
-    public void adicionarVenda(double valor) {
-        this.receitaAcumulada += valor;
-        this.totalPedidos++;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public Endereco getEndereco() {
+        return endereco;
+    }
+
+    public void setEndereco(Endereco endereco) {
+        this.endereco = endereco;
+    }
+
+    public String getCidade() {
+        return cidade;
+    }
+
+    public void setCidade(String cidade) {
+        this.cidade = cidade;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
+
+    public String getCep() {
+        return cep;
+    }
+
+    public void setCep(String cep) {
+        this.cep = cep;
+    }
+
+    public Gerente getGerente() {
+        return gerente;
+    }
+
+    public void setGerente(Gerente gerente) {
+        this.gerente = gerente;
+    }
+
+    public List<Vendedor> getVendedores() {
+        return vendedores;
+    }
+
+    public void setVendedores(List<Vendedor> vendedores) {
+        this.vendedores = vendedores;
+    }
+
+    public List<Produto> getProdutos() {
+        return produtos;
+    }
+
+    public void setProdutos(List<Produto> produtos) {
+        this.produtos = produtos;
+    }
+
+    public double getReceitaAcumulada() {
+        return receitaAcumulada;
+    }
+
+    public void setReceitaAcumulada(double receitaAcumulada) {
+        this.receitaAcumulada = receitaAcumulada;
+    }
+
+    public int getTotalPedidos() {
+        return totalPedidos;
+    }
+
+    public void setTotalPedidos(int totalPedidos) {
+        this.totalPedidos = totalPedidos;
     }
     
     public void adicionarVendedor(Vendedor vendedor) {
@@ -58,68 +146,20 @@ public class Franquia implements Serializable {
         }
     }
 
-    public Long getId() {
-        return id;
+    public double calcularTicketMedio() {
+        if (totalPedidos == 0) {
+            return 0.0;
+        }
+        return receitaAcumulada / totalPedidos;
     }
-
-    public String getNome() {
-        return nome;
+    
+    public void registrarVenda(double valor) {
+        this.receitaAcumulada += valor;
+        this.totalPedidos++;
     }
-
-    public Endereco getEndereco() {
-        return endereco;
-    }
-
-    public Gerente getGerente() {
-        return gerente;
-    }
-
-    public List<Vendedor> getVendedores() {
-        return vendedores;
-    }
-
-    public List<Produto> getProdutos() {
-        return produtos;
-    }
-
-    public double getReceitaAcumulada() {
-        return receitaAcumulada;
-    }
-
-    public int getTotalPedidos() {
-        return totalPedidos;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
-    public void setEndereco(Endereco endereco) {
-        this.endereco = endereco;
-    }
-
-    public void setGerente(Gerente gerente) {
-        this.gerente = gerente;
-    }
-
-    public void setVendedores(List<Vendedor> vendedores) {
-        this.vendedores = vendedores;
-    }
-
-    public void setProdutos(List<Produto> produtos) {
-        this.produtos = produtos;
-    }
-
-    public void setReceitaAcumulada(double receitaAcumulada) {
-        this.receitaAcumulada = receitaAcumulada;
-    }
-
-    public void setTotalPedidos(int totalPedidos) {
-        this.totalPedidos = totalPedidos;
+    
+    public String getEnderecoCompleto() {
+        return endereco.getEnderecoCompleto();
     }
     
     @Override

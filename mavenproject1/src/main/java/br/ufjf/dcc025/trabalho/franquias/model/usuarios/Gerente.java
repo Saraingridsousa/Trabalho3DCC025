@@ -1,11 +1,11 @@
 /*
- * Autores: Sara Ingrid - 202376049, Angélica Coutinho - 202376046
+ * Autores: Sara Ingrid - 202365056A, Angélica Coutinho - 202365064A
  */
 package br.ufjf.dcc025.trabalho.franquias.model.usuarios;
 
 public class Gerente extends Usuario {
     private Long franquiaId;
-        
+    
     public Gerente(String nome, String cpf, String email, String senha, Long franquiaId) {
         super(nome, cpf, email, senha);
         this.franquiaId = franquiaId;

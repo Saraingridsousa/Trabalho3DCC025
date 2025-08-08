@@ -24,20 +24,20 @@ public class Vendedor extends Usuario {
         return franquiaId;
     }
     
-    public double getTotalVendas() {
-        return totalVendas;
-    }
-    
-    public int getQuantidadeVendas() {
-        return quantidadeVendas;
-    }
-    
     public void setFranquiaId(Long franquiaId) {
         this.franquiaId = franquiaId;
     }
     
+    public double getTotalVendas() {
+        return totalVendas;
+    }
+    
     public void setTotalVendas(double totalVendas) {
         this.totalVendas = totalVendas;
+    }
+    
+    public int getQuantidadeVendas() {
+        return quantidadeVendas;
     }
     
     public void setQuantidadeVendas(int quantidadeVendas) {

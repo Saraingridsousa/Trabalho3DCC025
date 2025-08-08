@@ -57,15 +57,15 @@ public class PedidoService implements OperacoesCRUD<Pedido, Long> {
     }
     
     @Override
-    public Pedido buscarPorId(Long id) {
+    public Pedido buscarPorId(Long id) throws EntidadeNaoEncontradaException {
         return pedidos.stream()
                 .filter(p -> p.getId().equals(id))
                 .findFirst()
-                .orElse(null);
+                .orElseThrow(() -> new EntidadeNaoEncontradaException("Pedido", id));
     }
     
     @Override
-    public List<Pedido> listar() {
+    public List<Pedido> listarTodos() {
         return new ArrayList<>(pedidos);
     }
     
@@ -92,7 +92,7 @@ public class PedidoService implements OperacoesCRUD<Pedido, Long> {
             
             salvarDados();
             return pedido;
-        } catch (ValidacaoException e) {
+        } catch (ValidacaoException | EntidadeNaoEncontradaException e) {
             throw e;
         } catch (Exception e) {
             throw new ValidacaoException("Erro ao atualizar pedido: " + e.getMessage());
@@ -113,11 +113,14 @@ public class PedidoService implements OperacoesCRUD<Pedido, Long> {
                 salvarDados();
             }
             return removido;
+        } catch (EntidadeNaoEncontradaException e) {
+            throw e;
         } catch (Exception e) {
             return false;
         }
     }
     
+    @Override
     public boolean validar(Pedido pedido) throws ValidacaoException {
         if (pedido.getNomeCliente() == null || pedido.getNomeCliente().trim().isEmpty()) {
             throw new ValidacaoException("Nome do cliente é obrigatório");
@@ -127,7 +130,7 @@ public class PedidoService implements OperacoesCRUD<Pedido, Long> {
             throw new ValidacaoException("Vendedor é obrigatório");
         }
         
-        if (pedido.getFranquia().getId() == null) {
+        if (pedido.getFranquiaId() == null) {
             throw new ValidacaoException("Franquia é obrigatória");
         }
         
@@ -136,7 +139,7 @@ public class PedidoService implements OperacoesCRUD<Pedido, Long> {
         }
         
         try {
-            franquiaService.buscarFranquiaPorId(pedido.getFranquia().getId());
+            franquiaService.buscarFranquiaPorId(pedido.getFranquiaId());
         } catch (Exception e) {
             throw new ValidacaoException("Franquia não encontrada");
         }
@@ -169,31 +172,31 @@ public class PedidoService implements OperacoesCRUD<Pedido, Long> {
     public List<Pedido> listarPedidosPorVendedor(Vendedor vendedor) {
         return pedidos.stream()
                 .filter(p -> p.getVendedor().getId().equals(vendedor.getId()))
-                .sorted((p1, p2) -> p2.getDataCriacao().compareTo(p1.getDataCriacao()))
+                .sorted((p1, p2) -> p2.getDataHora().compareTo(p1.getDataHora()))
                 .collect(Collectors.toList());
     }
     
     public List<Pedido> listarPedidosPorFranquia(Long franquiaId) {
         return pedidos.stream()
-                .filter(p -> p.getFranquia().getId().equals(franquiaId))
-                .sorted((p1, p2) -> p2.getDataCriacao().compareTo(p1.getDataCriacao()))
+                .filter(p -> p.getFranquiaId().equals(franquiaId))
+                .sorted((p1, p2) -> p2.getDataHora().compareTo(p1.getDataHora()))
                 .collect(Collectors.toList());
     }
     
     public List<Pedido> listarPedidosPorStatus(Pedido.StatusPedido status) {
         return pedidos.stream()
                 .filter(p -> p.getStatus() == status)
-                .sorted((p1, p2) -> p2.getDataCriacao().compareTo(p1.getDataCriacao()))
+                .sorted((p1, p2) -> p2.getDataHora().compareTo(p1.getDataHora()))
                 .collect(Collectors.toList());
     }
     
     public List<Pedido> listarPedidosPorPeriodo(LocalDate inicio, LocalDate fim) {
         return pedidos.stream()
                 .filter(p -> {
-                    LocalDate dataPedido = p.getDataCriacao().toLocalDate();
+                    LocalDate dataPedido = p.getDataHora().toLocalDate();
                     return !dataPedido.isBefore(inicio) && !dataPedido.isAfter(fim);
                 })
-                .sorted((p1, p2) -> p2.getDataCriacao().compareTo(p1.getDataCriacao()))
+                .sorted((p1, p2) -> p2.getDataHora().compareTo(p1.getDataHora()))
                 .collect(Collectors.toList());
     }
     
@@ -204,7 +207,7 @@ public class PedidoService implements OperacoesCRUD<Pedido, Long> {
         
         if (novoStatus == Pedido.StatusPedido.ENTREGUE && statusAnterior != Pedido.StatusPedido.ENTREGUE) {
             Vendedor vendedor = pedido.getVendedor();
-            vendedor.adicionarVenda(pedido.getValorTotal());
+            vendedor.adicionarVenda(pedido.getTotal());
             
             try {
                 usuarioService.atualizarVendedor(vendedor);
@@ -229,7 +232,7 @@ public class PedidoService implements OperacoesCRUD<Pedido, Long> {
             );
         }
         
-        ItemPedido item = new ItemPedido(produto, quantidade);
+        ItemPedido item = new ItemPedido(produto, quantidade, observacoes);
         pedido.adicionarItem(item);
         
         produtoService.atualizarEstoque(produto.getId(), produto.getEstoque() - quantidade);
@@ -268,7 +271,7 @@ public class PedidoService implements OperacoesCRUD<Pedido, Long> {
         
         double faturamentoTotal = pedidos.stream()
                 .filter(p -> p.getStatus() == Pedido.StatusPedido.ENTREGUE)
-                .mapToDouble(Pedido::getValorTotal)
+                .mapToDouble(Pedido::getTotal)
                 .sum();
         stats.put("faturamentoTotal", faturamentoTotal);
         

@@ -5,9 +5,7 @@ package br.ufjf.dcc025.trabalho.franquias.test;
 
 import br.ufjf.dcc025.trabalho.franquias.exceptions.AcessoNegadoException;
 import br.ufjf.dcc025.trabalho.franquias.exceptions.ValidacaoException;
-import br.ufjf.dcc025.trabalho.franquias.model.franquia.Endereco;
 import br.ufjf.dcc025.trabalho.franquias.model.franquia.Franquia;
-import br.ufjf.dcc025.trabalho.franquias.model.pedido.Cliente;
 import br.ufjf.dcc025.trabalho.franquias.model.pedido.Pedido;
 import br.ufjf.dcc025.trabalho.franquias.model.produto.ItemPedido;
 import br.ufjf.dcc025.trabalho.franquias.model.produto.Produto;
@@ -83,24 +81,25 @@ public class DemonstracaoSistema {
             FranquiaService service = new FranquiaService();
             
             Gerente gerente = new Gerente("Ana Silva", "111.222.333-44", "ana@test.com", "123456", null);
-            Franquia franquia = service.cadastrar(new Franquia("Franquia Centro", 
-                    new Endereco("Rua Principal, 100", "Juiz de Fora", "MG", "36010-000"),
-                gerente)
+            Franquia franquia = service.cadastrarFranquia(
+                "Franquia Centro", 
+                "Rua Principal, 100", "Juiz de Fora", "MG", "36010-000", 
+                gerente
             );
             
             System.out.println("Franquia criada:");
             System.out.println("- Nome: " + franquia.getNome());
-            System.out.println("- Endereço: " + franquia.getEndereco().toString());
+            System.out.println("- Endereço: " + franquia.getEnderecoCompleto());
             System.out.println("- Gerente: " + (franquia.getGerente() != null ? franquia.getGerente().getNome() : "Não atribuído"));
             
-            franquia.adicionarVenda(150.0);
-            franquia.adicionarVenda(200.0);
-            franquia.adicionarVenda(100.0);
+            franquia.registrarVenda(150.0);
+            franquia.registrarVenda(200.0);
+            franquia.registrarVenda(100.0);
             
             System.out.println("\nEstatísticas da franquia:");
             System.out.println("- Total de pedidos: " + franquia.getTotalPedidos());
             System.out.println("- Receita acumulada: R$ " + String.format("%.2f", franquia.getReceitaAcumulada()));
-            System.out.println("- Ticket médio: R$ " + String.format("%.2f", franquia.getTicketMedio()));
+            System.out.println("- Ticket médio: R$ " + String.format("%.2f", franquia.calcularTicketMedio()));
             
         } catch (Exception e) {
             System.err.println("Erro: " + e.getMessage());
@@ -159,11 +158,7 @@ public class DemonstracaoSistema {
             Produto refrigerante = new Produto("Refrigerante", "Coca-Cola", 5.90, 20, 5, "Bebida");
             refrigerante.setId(2L);
             
-            Gerente gerente = new Gerente("Ana Silva", "111.222.333-44", "ana@test.com", "123456", null);;
-            Franquia franquia = new Franquia("Teste", new Endereco("Rua", "jf", "mg", "00000-000"), gerente);
-            Pedido pedido = new Pedido(new Cliente("João da Silva", "000.000.000-00", "99999-9999", new Endereco("Rua", "sp", "sp", "00000-000")), 
-                    vendedor, franquia);
-            
+            Pedido pedido = new Pedido("João da Silva", vendedor, 1L);
             pedido.setFormaPagamento("Cartão de Crédito");
             pedido.setModalidadeEntrega("Balcão");
             pedido.setTaxaServico(2.00);
@@ -187,7 +182,7 @@ public class DemonstracaoSistema {
             System.out.println("\nTotais:");
             System.out.println("- Subtotal: R$ " + String.format("%.2f", pedido.getSubtotal()));
             System.out.println("- Taxa de serviço: R$ " + String.format("%.2f", pedido.getTaxaServico()));
-            System.out.println("- Total: R$ " + String.format("%.2f", pedido.getValorTotal()));
+            System.out.println("- Total: R$ " + String.format("%.2f", pedido.getTotal()));
             
         } catch (Exception e) {
             System.err.println("Erro: " + e.getMessage());

@@ -19,10 +19,10 @@ public class Cliente implements Serializable {
     private double valorTotalCompras;
     private LocalDateTime ultimaCompra;
         
-    public Cliente(String nome, String email, String telefone, Endereco endereco) {
+    public Cliente(String nome, String telefone, String email, Endereco endereco) {
         this.nome = nome;
-        this.email = email;
         this.telefone = telefone;
+        this.email = email;
         this.endereco = endereco;
         this.quantidadeCompras = 0;
         this.valorTotalCompras = 0.0;
@@ -32,60 +32,60 @@ public class Cliente implements Serializable {
         return id;
     }
 
-    public String getNome() {
-        return nome;
-    }
-
-    public String getTelefone() {
-        return telefone;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public Endereco getEndereco() {
-        return endereco;
-    }
-
-    public int getQuantidadeCompras() {
-        return quantidadeCompras;
-    }
-
-    public double getValorTotalCompras() {
-        return valorTotalCompras;
-    }
-
-    public LocalDateTime getUltimaCompra() {
-        return ultimaCompra;
-    }
-
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getNome() {
+        return nome;
     }
 
     public void setNome(String nome) {
         this.nome = nome;
     }
 
+    public String getTelefone() {
+        return telefone;
+    }
+
     public void setTelefone(String telefone) {
         this.telefone = telefone;
+    }
+
+    public String getEmail() {
+        return email;
     }
 
     public void setEmail(String email) {
         this.email = email;
     }
 
+    public Endereco getEndereco() {
+        return endereco;
+    }
+
     public void setEndereco(Endereco endereco) {
         this.endereco = endereco;
+    }
+
+    public int getQuantidadeCompras() {
+        return quantidadeCompras;
     }
 
     public void setQuantidadeCompras(int quantidadeCompras) {
         this.quantidadeCompras = quantidadeCompras;
     }
 
+    public double getValorTotalCompras() {
+        return valorTotalCompras;
+    }
+
     public void setValorTotalCompras(double valorTotalCompras) {
         this.valorTotalCompras = valorTotalCompras;
+    }
+
+    public LocalDateTime getUltimaCompra() {
+        return ultimaCompra;
     }
 
     public void setUltimaCompra(LocalDateTime ultimaCompra) {
@@ -116,6 +116,8 @@ public class Cliente implements Serializable {
                 ", nome='" + nome + '\'' +
                 ", email='" + email + '\'' +
                 ", telefone='" + telefone + '\'' +
+                ", quantidadeCompras=" + quantidadeCompras +
+                ", valorTotalCompras=" + valorTotalCompras +
                 '}';
     }
 }

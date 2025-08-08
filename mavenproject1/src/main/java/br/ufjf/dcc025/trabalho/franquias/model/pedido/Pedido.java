@@ -5,45 +5,140 @@ package br.ufjf.dcc025.trabalho.franquias.model.pedido;
 
 import br.ufjf.dcc025.trabalho.franquias.model.produto.ItemPedido;
 import br.ufjf.dcc025.trabalho.franquias.model.usuarios.Vendedor;
-import br.ufjf.dcc025.trabalho.franquias.model.franquia.Franquia;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Pedido implements Serializable {
-    
-    public enum StatusPedido {
-        EM_ANDAMENTO, ENTREGUE, CANCELADO, PENDENTE, APROVADO
-    }
+    private static final long serialVersionUID = 1L;
     
     private Long id;
-    private Cliente cliente;
-    private Vendedor vendedor;
-    private Franquia franquia;
-    private LocalDateTime dataCriacao;
-    private LocalDateTime dataFinalizacao;
+    private String nomeCliente;
+    private LocalDateTime dataHora;
     private List<ItemPedido> itens;
     private String formaPagamento;
     private String modalidadeEntrega;
     private double valorTotal;
     private double taxaEntrega;
     private double taxaServico;
+    private Vendedor vendedor;
+    private Long franquiaId;
     private StatusPedido status;
     
-    public Pedido(Cliente cliente, Vendedor vendedor, Franquia franquia) {
-        this.cliente = cliente;
-        this.vendedor = vendedor;
-        this.franquia = franquia;
+    public enum StatusPedido {
+        PENDENTE, APROVADO, REJEITADO, ENTREGUE, CANCELADO
+    }
+    
+    public Pedido() {
         this.itens = new ArrayList<>();
-        this.dataCriacao = LocalDateTime.now();
+        this.dataHora = LocalDateTime.now();
         this.status = StatusPedido.PENDENTE;
         this.taxaEntrega = 0.0;
         this.taxaServico = 0.0;
     }
     
+    public Pedido(String nomeCliente, Vendedor vendedor, Long franquiaId) {
+        this();
+        this.nomeCliente = nomeCliente;
+        this.vendedor = vendedor;
+        this.franquiaId = franquiaId;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getNomeCliente() {
+        return nomeCliente;
+    }
+
+    public void setNomeCliente(String nomeCliente) {
+        this.nomeCliente = nomeCliente;
+    }
+
+    public LocalDateTime getDataHora() {
+        return dataHora;
+    }
+
+    public void setDataHora(LocalDateTime dataHora) {
+        this.dataHora = dataHora;
+    }
+
+    public List<ItemPedido> getItens() {
+        return itens;
+    }
+
+    public void setItens(List<ItemPedido> itens) {
+        this.itens = itens;
+    }
+
+    public String getFormaPagamento() {
+        return formaPagamento;
+    }
+
+    public void setFormaPagamento(String formaPagamento) {
+        this.formaPagamento = formaPagamento;
+    }
+
+    public String getModalidadeEntrega() {
+        return modalidadeEntrega;
+    }
+
+    public void setModalidadeEntrega(String modalidadeEntrega) {
+        this.modalidadeEntrega = modalidadeEntrega;
+    }
+
     public double getTotal() {
-        return itens.stream().mapToDouble(ItemPedido::getSubtotal).sum();
+        return valorTotal;
+    }
+
+    public void setValorTotal(double valorTotal) {
+        this.valorTotal = valorTotal;
+    }
+
+    public double getTaxaEntrega() {
+        return taxaEntrega;
+    }
+
+    public void setTaxaEntrega(double taxaEntrega) {
+        this.taxaEntrega = taxaEntrega;
+    }
+
+    public double getTaxaServico() {
+        return taxaServico;
+    }
+
+    public void setTaxaServico(double taxaServico) {
+        this.taxaServico = taxaServico;
+    }
+
+    public Vendedor getVendedor() {
+        return vendedor;
+    }
+
+    public void setVendedor(Vendedor vendedor) {
+        this.vendedor = vendedor;
+    }
+
+    public Long getFranquiaId() {
+        return franquiaId;
+    }
+
+    public void setFranquiaId(Long franquiaId) {
+        this.franquiaId = franquiaId;
+    }
+
+    public StatusPedido getStatus() {
+        return status;
+    }
+
+    public void setStatus(StatusPedido status) {
+        this.status = status;
     }
     
     public void adicionarItem(ItemPedido item) {
@@ -75,126 +170,18 @@ public class Pedido implements Serializable {
     }
     
     public boolean isValido() {
-        return cliente.getNome() != null && !cliente.getNome().trim().isEmpty() &&
+        return nomeCliente != null && !nomeCliente.trim().isEmpty() &&
                !itens.isEmpty() && 
                formaPagamento != null && !formaPagamento.trim().isEmpty() &&
                modalidadeEntrega != null && !modalidadeEntrega.trim().isEmpty() &&
                vendedor != null;
     }
     
-    public Long getId() {
-        return id;
-    }
-    
-    public Cliente getCliente() {
-        return cliente;
-    }
-    
-    public String getNomeCliente() {
-        return cliente.getNome();
-    }
-    
-    public Vendedor getVendedor() {
-        return vendedor;
-    }
-    
-    public Franquia getFranquia() {
-        return franquia;
-    }
-    
-    public List<ItemPedido> getItens() {
-        return new ArrayList<>(itens);
-    }
-    
-    public LocalDateTime getDataCriacao() {
-        return dataCriacao;
-    }
-    
-    public LocalDateTime getDataFinalizacao() {
-        return dataFinalizacao;
-    }
-    
-    public StatusPedido getStatus() {
-        return status;
-    }
-
-    public String getFormaPagamento() {
-        return formaPagamento;
-    }
-
-    public String getModalidadeEntrega() {
-        return modalidadeEntrega;
-    }
-
-    public double getValorTotal() {
-        return valorTotal;
-    }
-
-    public double getTaxaEntrega() {
-        return taxaEntrega;
-    }
-
-    public double getTaxaServico() {
-        return taxaServico;
-    }
-    
-    public void setId(Long id) {
-        this.id = id;
-    }
-    
-    public void setCliente(Cliente cliente) {
-        this.cliente = cliente;
-    }
-    
-    public void setVendedor(Vendedor vendedor) {
-        this.vendedor = vendedor;
-    }
-    
-    public void setFranquia(Franquia franquia) {
-        this.franquia = franquia;
-    }
-    
-    public void setDataCriacao(LocalDateTime dataCriacao) {
-        this.dataCriacao = dataCriacao;
-    }
-    
-    public void setDataFinalizacao(LocalDateTime dataFinalizacao) {
-        this.dataFinalizacao = dataFinalizacao;
-    }
-    
-    public void setStatus(StatusPedido status) {
-        this.status = status;
-    }
-
-    public void setItens(List<ItemPedido> itens) {
-        this.itens = itens;
-    }
-           
-    public void setFormaPagamento(String formaPagamento) {
-        this.formaPagamento = formaPagamento;
-    }
-
-    public void setModalidadeEntrega(String modalidadeEntrega) {
-        this.modalidadeEntrega = modalidadeEntrega;
-    }
-
-    public void setValorTotal(double valorTotal) {
-        this.valorTotal = valorTotal;
-    }
-
-    public void setTaxaEntrega(double taxaEntrega) {
-        this.taxaEntrega = taxaEntrega;
-    }
-
-    public void setTaxaServico(double taxaServico) {
-        this.taxaServico = taxaServico;
-    }
-    
     @Override
     public String toString() {
         return "Pedido{" +
                 "id=" + id +
-                ", cliente=" + cliente.getNome() +
+                ", cliente=" + nomeCliente +
                 ", vendedor=" + vendedor.getNome() +
                 ", total=" + getTotal() +
                 ", status=" + status +

@@ -16,17 +16,72 @@ public class Produto implements Serializable {
     private int estoqueMinimo;
     private String categoria;
     
-    public Produto(String nome, String descricao, double preco, int estoque, int estoqueMinimo, String categoria) {
+    public Produto() {
+    }
+    
+    public Produto(String nome, String descricao, double preco, int quantidadeEstoque, int estoqueMinimo, String categoria) {
         this.nome = nome;
         this.descricao = descricao;
         this.preco = preco;
-        this.estoque = estoque;
+        this.estoque = quantidadeEstoque;
         this.estoqueMinimo = estoqueMinimo;
         this.categoria = categoria;
     }
 
-    public boolean isDisponivel(int quantidadeDesejada) {
-        return estoque >= quantidadeDesejada;
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public String getDescricao() {
+        return descricao;
+    }
+
+    public void setDescricao(String descricao) {
+        this.descricao = descricao;
+    }
+
+    public double getPreco() {
+        return preco;
+    }
+
+    public void setPreco(double preco) {
+        this.preco = preco;
+    }
+
+    public int getEstoque() {
+        return estoque;
+    }
+
+    public void setEstoque(int estoque) {
+        this.estoque = estoque;
+    }
+
+    public int getEstoqueMinimo() {
+        return estoqueMinimo;
+    }
+
+    public void setEstoqueMinimo(int estoqueMinimo) {
+        this.estoqueMinimo = estoqueMinimo;
+    }
+
+    public String getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(String categoria) {
+        this.categoria = categoria;
     }
     
     public boolean isEstoqueBaixo() {
@@ -46,63 +101,11 @@ public class Produto implements Serializable {
             this.estoque += quantidade;
         }
     }
-
-    public Long getId() {
-        return id;
+    
+    public boolean isDisponivel(int quantidadeDesejada) {
+        return estoque >= quantidadeDesejada;
     }
-
-    public String getNome() {
-        return nome;
-    }
-
-    public String getDescricao() {
-        return descricao;
-    }
-
-    public double getPreco() {
-        return preco;
-    }
-
-    public int getEstoque() {
-        return estoque;
-    }
-
-    public int getEstoqueMinimo() {
-        return estoqueMinimo;
-    }
-
-    public String getCategoria() {
-        return categoria;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
-    }
-
-    public void setPreco(double preco) {
-        this.preco = preco;
-    }
-
-    public void setEstoque(int estoque) {
-        this.estoque = estoque;
-    }
-
-    public void setEstoqueMinimo(int estoqueMinimo) {
-        this.estoqueMinimo = estoqueMinimo;
-    }
-
-    public void setCategoria(String categoria) {
-        this.categoria = categoria;
-    }
-
+    
     @Override
     public String toString() {
         return id + " - " + nome +

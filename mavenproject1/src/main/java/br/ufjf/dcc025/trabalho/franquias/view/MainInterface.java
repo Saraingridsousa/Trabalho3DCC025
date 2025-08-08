@@ -3,61 +3,54 @@
  */
 package br.ufjf.dcc025.trabalho.franquias.view;
 
-import br.ufjf.dcc025.trabalho.franquias.exceptions.ValidacaoException;
-import br.ufjf.dcc025.trabalho.franquias.model.franquia.Endereco;
-import br.ufjf.dcc025.trabalho.franquias.model.franquia.Franquia;
-import br.ufjf.dcc025.trabalho.franquias.model.pedido.Cliente;
-import br.ufjf.dcc025.trabalho.franquias.model.pedido.Pedido;
-import br.ufjf.dcc025.trabalho.franquias.model.produto.ItemPedido;
-import br.ufjf.dcc025.trabalho.franquias.model.produto.Produto;
-import br.ufjf.dcc025.trabalho.franquias.model.usuarios.Usuario;
-import br.ufjf.dcc025.trabalho.franquias.model.usuarios.Dono;
-import br.ufjf.dcc025.trabalho.franquias.model.usuarios.Gerente;
-import br.ufjf.dcc025.trabalho.franquias.model.usuarios.Vendedor;
-import br.ufjf.dcc025.trabalho.franquias.service.UsuarioService;
-import br.ufjf.dcc025.trabalho.franquias.service.FranquiaService;
-import br.ufjf.dcc025.trabalho.franquias.service.PedidoService;
-import br.ufjf.dcc025.trabalho.franquias.service.ProdutoService;
+import br.ufjf.dcc025.trabalho.franquias.exceptions.*;
+import br.ufjf.dcc025.trabalho.franquias.model.franquia.*;
+import br.ufjf.dcc025.trabalho.franquias.model.pedido.*;
+import br.ufjf.dcc025.trabalho.franquias.model.produto.*;
+import br.ufjf.dcc025.trabalho.franquias.model.usuarios.*;
+import br.ufjf.dcc025.trabalho.franquias.service.*;
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
-import javax.swing.table.DefaultTableModel;
 
-public class MainInterface extends JFrame {
+public class MainInterface extends javax.swing.JFrame {
+    
     private final Usuario usuarioLogado;
     private final UsuarioService usuarioService;
     private final FranquiaService franquiaService;
     private final ProdutoService produtoService;
-    
-    private JLabel labelUsuario;
-    private JPanel panelPrincipal;
-    
-    public MainInterface(Usuario usuarioLogado) {
-        this.usuarioLogado = usuarioLogado;
-        this.usuarioService = new UsuarioService();
+    private JPanel contentPanel;
+    private JLabel userInfoLabel;
+
+    public MainInterface(Usuario usuario, UsuarioService usuarioService) {
+        this.usuarioLogado = usuario;
+        this.usuarioService = usuarioService;
         this.franquiaService = new FranquiaService();
         this.produtoService = new ProdutoService();
         
         initComponents();
-        configurarPermissoes();
-    }
-    
-    private void initComponents() {
-        setTitle("Sistema de Gestão de Franquias - " + usuarioLogado.getTipoUsuario());
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setupMenuBasedOnUserType();
+        updateUserInfo();
         setLocationRelativeTo(null);
+    }
+
+    private void initComponents() {
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Sistema de Gerenciamento de Franquias");
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         
         setLayout(new BorderLayout());
         
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         
-        labelUsuario = new JLabel();
-        labelUsuario.setFont(new Font("Arial", Font.BOLD, 14));
-        topPanel.add(labelUsuario, BorderLayout.WEST);
+        userInfoLabel = new JLabel();
+        userInfoLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        topPanel.add(userInfoLabel, BorderLayout.WEST);
         
         JButton logoutButton = new JButton("Sair");
         logoutButton.addActionListener(e -> logout());
@@ -65,17 +58,17 @@ public class MainInterface extends JFrame {
         
         add(topPanel, BorderLayout.NORTH);
         
-        panelPrincipal = new JPanel(new BorderLayout());
-        panelPrincipal.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        contentPanel = new JPanel(new BorderLayout());
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         
         showWelcomePanel();
         
-        add(panelPrincipal, BorderLayout.CENTER);
+        add(contentPanel, BorderLayout.CENTER);
         
         pack();
     }
     
-    private void configurarPermissoes() {
+    private void setupMenuBasedOnUserType() {
         JMenuBar menuBar = new JMenuBar();
         
         if (usuarioLogado instanceof Dono) {
@@ -154,11 +147,11 @@ public class MainInterface extends JFrame {
     private void updateUserInfo() {
         String tipo = usuarioLogado.getTipoUsuario();
         String nome = usuarioLogado.getNome();
-        labelUsuario.setText(String.format("Usuário: %s (%s)", nome, tipo));
+        userInfoLabel.setText(String.format("Usuário: %s (%s)", nome, tipo));
     }
     
     private void showWelcomePanel() {
-        panelPrincipal.removeAll();
+        contentPanel.removeAll();
         
         JPanel welcomePanel = new JPanel(new BorderLayout());
         
@@ -175,9 +168,9 @@ public class MainInterface extends JFrame {
         JScrollPane scrollPane = new JScrollPane(infoArea);
         welcomePanel.add(scrollPane, BorderLayout.CENTER);
         
-        panelPrincipal.add(welcomePanel, BorderLayout.CENTER);
-        panelPrincipal.revalidate();
-        panelPrincipal.repaint();
+        contentPanel.add(welcomePanel, BorderLayout.CENTER);
+        contentPanel.revalidate();
+        contentPanel.repaint();
     }
     
     private String getWelcomeMessage() {
@@ -209,11 +202,10 @@ public class MainInterface extends JFrame {
         return sb.toString();
     }
     
-    
     // ========== PAINÉIS DE FUNCIONALIDADES ==========
     
     private void showCadastroFranquiaPanel() {
-        panelPrincipal.removeAll();
+        contentPanel.removeAll();
         
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBorder(BorderFactory.createTitledBorder("Cadastro de Franquia"));
@@ -228,16 +220,16 @@ public class MainInterface extends JFrame {
         JTextField cepField = new JTextField(12);
         
         JComboBox<Gerente> gerenteCombo = new JComboBox<>();
-        gerenteCombo.addItem(null); 
+        gerenteCombo.addItem(null);
         
-        java.util.List<Gerente> gerentes = usuarioService.listarGerentesDisponiveis();
+        List<Gerente> gerentes = usuarioService.listarGerentesDisponiveis();
         System.out.println("DEBUG: Gerentes disponíveis encontrados: " + gerentes.size());
         
         if (gerentes.isEmpty()) {
             JLabel avisoLabel = new JLabel("<html><font color='red'>Nenhum gerente disponível!<br>Cadastre gerentes primeiro.</font></html>");
-            gbc.gridx = 0; gbc.gridy = 7; gbc.gridwidth = 2; 
+            gbc.gridx = 0; gbc.gridy = 7; gbc.gridwidth = 2;
             panel.add(avisoLabel, gbc);
-            gbc.gridwidth = 1; 
+            gbc.gridwidth = 1;
         }
         
         for (Gerente g : gerentes) {
@@ -305,8 +297,7 @@ public class MainInterface extends JFrame {
                 
                 System.out.println("DEBUG: Gerente selecionado: " + (gerente != null ? gerente.getNome() : "null"));
                 
-                Franquia franquia = new Franquia(nome, new Endereco(endereco, cidade, estado, cep), gerente);
-                franquiaService.cadastrar(franquia);
+                Franquia franquia = franquiaService.cadastrarFranquia(nome, endereco, cidade, estado, cep, gerente);
                 
                 String mensagem = "Franquia cadastrada com sucesso!\nID: " + franquia.getId();
                 if (gerente != null) {
@@ -337,25 +328,25 @@ public class MainInterface extends JFrame {
         gbc.anchor = GridBagConstraints.CENTER;
         panel.add(cadastrarButton, gbc);
         
-        panelPrincipal.add(panel, BorderLayout.NORTH);
-        panelPrincipal.revalidate();
-        panelPrincipal.repaint();
+        contentPanel.add(panel, BorderLayout.NORTH);
+        contentPanel.revalidate();
+        contentPanel.repaint();
     }
     
     private void showListaFranquiasPanel() {
-        panelPrincipal.removeAll();
+        contentPanel.removeAll();
         
         String[] colunas = {"ID", "Nome", "Cidade", "Estado", "Gerente", "Vendedores", "Receita"};
         
-        java.util.List<Franquia> franquias = franquiaService.listar();
+        List<Franquia> franquias = franquiaService.listarFranquias();
         Object[][] dados = new Object[franquias.size()][7];
         
         for (int i = 0; i < franquias.size(); i++) {
             Franquia f = franquias.get(i);
             dados[i][0] = f.getId();
             dados[i][1] = f.getNome();
-            dados[i][2] = f.getEndereco().getCidade();
-            dados[i][3] = f.getEndereco().getEstado();
+            dados[i][2] = f.getCidade();
+            dados[i][3] = f.getEstado();
             dados[i][4] = f.getGerente() != null ? f.getGerente().getNome() : "Não atribuído";
             dados[i][5] = f.getVendedores().size();
             dados[i][6] = String.format("R$ %.2f", f.getReceitaAcumulada());
@@ -401,14 +392,14 @@ public class MainInterface extends JFrame {
         buttonPanel.add(detalhesBtn);
         buttonPanel.add(voltarBtn);
         
-        panelPrincipal.add(scrollPane, BorderLayout.CENTER);
-        panelPrincipal.add(buttonPanel, BorderLayout.SOUTH);
-        panelPrincipal.revalidate();
-        panelPrincipal.repaint();
+        contentPanel.add(scrollPane, BorderLayout.CENTER);
+        contentPanel.add(buttonPanel, BorderLayout.SOUTH);
+        contentPanel.revalidate();
+        contentPanel.repaint();
     }
     
     private void showEditarFranquiaPanel() {
-        panelPrincipal.removeAll();
+        contentPanel.removeAll();
         
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBorder(BorderFactory.createTitledBorder("Editar Franquias"));
@@ -417,13 +408,13 @@ public class MainInterface extends JFrame {
         selectionPanel.add(new JLabel("Selecione a franquia para editar:"));
         
         JComboBox<Franquia> franquiaCombo = new JComboBox<>();
-        java.util.List<Franquia> franquias = franquiaService.listar();
+        List<Franquia> franquias = franquiaService.listarFranquias();
         
         if (franquias.isEmpty()) {
             JLabel semFranquias = new JLabel("<html><center><h3>Nenhuma franquia cadastrada!</h3><p>Cadastre franquias primeiro.</p></center></html>");
-            panelPrincipal.add(semFranquias, BorderLayout.CENTER);
-            panelPrincipal.revalidate();
-            panelPrincipal.repaint();
+            contentPanel.add(semFranquias, BorderLayout.CENTER);
+            contentPanel.revalidate();
+            contentPanel.repaint();
             return;
         }
         
@@ -462,9 +453,9 @@ public class MainInterface extends JFrame {
             }
         });
         
-        panelPrincipal.add(mainPanel, BorderLayout.CENTER);
-        panelPrincipal.revalidate();
-        panelPrincipal.repaint();
+        contentPanel.add(mainPanel, BorderLayout.CENTER);
+        contentPanel.revalidate();
+        contentPanel.repaint();
     }
     
     private void mostrarFormularioEdicaoFranquia(Franquia franquia, JPanel editPanel) {
@@ -495,7 +486,7 @@ public class MainInterface extends JFrame {
         
         gbc.gridx = 0; gbc.gridy = 3;
         formPanel.add(new JLabel("Cidade/Estado:"), gbc);
-        JLabel localLabel = new JLabel(franquia.getEndereco().getCidade() + "/" + franquia.getEndereco().getEstado());
+        JLabel localLabel = new JLabel(franquia.getCidade() + "/" + franquia.getEstado());
         gbc.gridx = 1;
         formPanel.add(localLabel, gbc);
         
@@ -511,7 +502,7 @@ public class MainInterface extends JFrame {
         JComboBox<Gerente> novoGerenteCombo = new JComboBox<>();
         novoGerenteCombo.addItem(null); 
         
-        java.util.List<Gerente> gerentesDisponiveis = usuarioService.listarGerentesDisponiveis();
+        List<Gerente> gerentesDisponiveis = usuarioService.listarGerentesDisponiveis();
         gerentesDisponiveis.forEach(novoGerenteCombo::addItem);
         
         if (franquia.getGerente() != null) {
@@ -569,7 +560,7 @@ public class MainInterface extends JFrame {
                     usuarioService.atualizarFranquiaIdGerente(novoGerente.getId(), franquia.getId());
                 }
                 
-                franquiaService.atualizar(franquia);
+                franquiaService.atualizarFranquia(franquia);
                 
                 String mensagem = "Franquia atualizada com sucesso!\n\n";
                 if (gerenteAnterior != null && novoGerente == null) {
@@ -610,7 +601,7 @@ public class MainInterface extends JFrame {
     }
     
     private void showCadastroGerentePanel() {
-        panelPrincipal.removeAll();
+        contentPanel.removeAll();
         
         JPanel formPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -654,7 +645,7 @@ public class MainInterface extends JFrame {
         JComboBox<String> franquiaCombo = new JComboBox<>();
         franquiaCombo.addItem("Nenhuma franquia (disponível)");
         try {
-            franquiaService.listar().forEach(f -> 
+            franquiaService.listarFranquias().forEach(f -> 
                 franquiaCombo.addItem(f.getId() + " - " + f.getNome())
             );
         } catch (Exception e) {
@@ -662,7 +653,6 @@ public class MainInterface extends JFrame {
         gbc.gridx = 1;
         formPanel.add(franquiaCombo, gbc);
         
-        // Botões
         JPanel buttonPanel = new JPanel(new FlowLayout());
         JButton salvarBtn = new JButton("Salvar");
         JButton cancelarBtn = new JButton("Cancelar");
@@ -715,15 +705,15 @@ public class MainInterface extends JFrame {
         gbc.gridx = 0; gbc.gridy = 6; gbc.gridwidth = 2;
         formPanel.add(buttonPanel, gbc);
         
-        panelPrincipal.add(formPanel, BorderLayout.CENTER);
-        panelPrincipal.revalidate();
-        panelPrincipal.repaint();
+        contentPanel.add(formPanel, BorderLayout.CENTER);
+        contentPanel.revalidate();
+        contentPanel.repaint();
     }
     
     private void showListaGerentesPanel() {
-        panelPrincipal.removeAll();
+        contentPanel.removeAll();
         
-        java.util.List<Gerente> gerentes = usuarioService.listarGerentes();
+        List<Gerente> gerentes = usuarioService.listarGerentes();
         
         String[] columnNames = {"ID", "Nome", "Email", "CPF", "Franquia ID"};
         Object[][] data = new Object[gerentes.size()][5];
@@ -790,16 +780,16 @@ public class MainInterface extends JFrame {
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(BorderFactory.createTitledBorder("Lista de Gerentes"));
         
-        panelPrincipal.add(scrollPane, BorderLayout.CENTER);
-        panelPrincipal.add(buttonPanel, BorderLayout.SOUTH);
-        panelPrincipal.revalidate();
-        panelPrincipal.repaint();
+        contentPanel.add(scrollPane, BorderLayout.CENTER);
+        contentPanel.add(buttonPanel, BorderLayout.SOUTH);
+        contentPanel.revalidate();
+        contentPanel.repaint();
     }
     
     private void showListaUsuariosPanel() {
-        panelPrincipal.removeAll();
+        contentPanel.removeAll();
         
-        java.util.List<Usuario> usuarios = usuarioService.listarUsuarios();
+        List<Usuario> usuarios = usuarioService.listarUsuarios();
         
         String[] columnNames = {"ID", "Nome", "Email", "CPF", "Tipo"};
         Object[][] data = new Object[usuarios.size()][5];
@@ -823,7 +813,7 @@ public class MainInterface extends JFrame {
         
         tipoCombo.addActionListener(e -> {
             String tipoSelecionado = (String) tipoCombo.getSelectedItem();
-            java.util.List<Usuario> usuariosFiltrados;
+            List<Usuario> usuariosFiltrados;
             
             if ("Todos".equals(tipoSelecionado)) {
                 usuariosFiltrados = usuarioService.listarUsuarios();
@@ -859,15 +849,15 @@ public class MainInterface extends JFrame {
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(BorderFactory.createTitledBorder("Lista de Usuários"));
         
-        panelPrincipal.add(filterPanel, BorderLayout.NORTH);
-        panelPrincipal.add(scrollPane, BorderLayout.CENTER);
-        panelPrincipal.add(buttonPanel, BorderLayout.SOUTH);
-        panelPrincipal.revalidate();
-        panelPrincipal.repaint();
+        contentPanel.add(filterPanel, BorderLayout.NORTH);
+        contentPanel.add(scrollPane, BorderLayout.CENTER);
+        contentPanel.add(buttonPanel, BorderLayout.SOUTH);
+        contentPanel.revalidate();
+        contentPanel.repaint();
     }
     
     private void showCadastroVendedorPanel() {
-        panelPrincipal.removeAll();
+        contentPanel.removeAll();
         
         JPanel formPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -911,7 +901,7 @@ public class MainInterface extends JFrame {
         JComboBox<String> franquiaCombo = new JComboBox<>();
         franquiaCombo.addItem("Selecione uma franquia");
         try {
-            franquiaService.listar().forEach(f -> 
+            franquiaService.listarFranquias().forEach(f -> 
                 franquiaCombo.addItem(f.getId() + " - " + f.getNome())
             );
         } catch (Exception e) {
@@ -965,75 +955,15 @@ public class MainInterface extends JFrame {
         gbc.gridx = 0; gbc.gridy = 6; gbc.gridwidth = 2;
         formPanel.add(buttonPanel, gbc);
         
-        panelPrincipal.add(formPanel, BorderLayout.CENTER);
-        panelPrincipal.revalidate();
-        panelPrincipal.repaint();
-    }
-    
-    private JPanel createRelatorioPanel(String titulo, String conteudo) {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.GRAY), titulo));
-        
-        JTextArea textArea = new JTextArea(conteudo);
-        textArea.setEditable(false);
-        textArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-        textArea.setBackground(new Color(248, 248, 248));
-        
-        JScrollPane scrollPane = new JScrollPane(textArea);
-        scrollPane.setPreferredSize(new Dimension(300, 200));
-        
-        panel.add(scrollPane, BorderLayout.CENTER);
-        return panel;
-    }
-    
-    private void showRelatoriosConsolidadosPanel() {
-        panelPrincipal.removeAll();
-        
-        JPanel relatoriosPanel = new JPanel(new GridLayout(2, 2, 10, 10));
-        relatoriosPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        
-        JPanel franquiasPanel = createRelatorioPanel("📊 Relatório de Franquias", 
-            getFranquiasRelatoriο());
-        
-        JPanel usuariosPanel = createRelatorioPanel("👥 Relatório de Usuários", 
-            getUsuariosRelatorio());
-        
-        JPanel produtosPanel = createRelatorioPanel("📦 Relatório de Produtos", 
-            getProdutosRelatorio());
-        
-        JPanel vendedoresPanel = createRelatorioPanel("🏆 Ranking de Vendedores", 
-            getVendedoresRelatorio());
-        
-        relatoriosPanel.add(franquiasPanel);
-        relatoriosPanel.add(usuariosPanel);
-        relatoriosPanel.add(produtosPanel);
-        relatoriosPanel.add(vendedoresPanel);
-        
-        JLabel titleLabel = new JLabel("📈 RELATÓRIOS CONSOLIDADOS DO SISTEMA", SwingConstants.CENTER);
-        titleLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 18));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 20, 0));
-        
-        JPanel buttonPanel = new JPanel(new FlowLayout());
-        JButton voltarBtn = new JButton("Voltar");
-        JButton atualizarBtn = new JButton("Atualizar Dados");
-        
-        voltarBtn.addActionListener(e -> showDashboard());
-        atualizarBtn.addActionListener(e -> showRelatoriosConsolidadosPanel());
-        
-        buttonPanel.add(atualizarBtn);
-        buttonPanel.add(voltarBtn);
-        
-        panelPrincipal.add(titleLabel, BorderLayout.NORTH);
-        panelPrincipal.add(relatoriosPanel, BorderLayout.CENTER);
-        panelPrincipal.add(buttonPanel, BorderLayout.SOUTH);
-        panelPrincipal.revalidate();
-        panelPrincipal.repaint();
+        contentPanel.add(formPanel, BorderLayout.CENTER);
+        contentPanel.revalidate();
+        contentPanel.repaint();
     }
     
     private void showListaVendedoresPanel() {
-        panelPrincipal.removeAll();
+        contentPanel.removeAll();
         
-        java.util.List<Vendedor> vendedores = usuarioService.listarVendedores();
+        List<Vendedor> vendedores = usuarioService.listarVendedores();
         
         String[] columnNames = {"ID", "Nome", "Email", "CPF", "Franquia ID", "Total Vendas", "Qtd Vendas"};
         Object[][] data = new Object[vendedores.size()][7];
@@ -1059,7 +989,7 @@ public class MainInterface extends JFrame {
         franquiaCombo.addItem("Todas as franquias");
         
         try {
-            franquiaService.listar().forEach(f -> 
+            franquiaService.listarFranquias().forEach(f -> 
                 franquiaCombo.addItem(f.getId() + " - " + f.getNome())
             );
         } catch (Exception e) {
@@ -1067,7 +997,7 @@ public class MainInterface extends JFrame {
         
         franquiaCombo.addActionListener(e -> {
             String selected = (String) franquiaCombo.getSelectedItem();
-            java.util.List<Vendedor> vendedoresFiltrados;
+            List<Vendedor> vendedoresFiltrados;
             
             if ("Todas as franquias".equals(selected)) {
                 vendedoresFiltrados = usuarioService.listarVendedores();
@@ -1128,7 +1058,7 @@ public class MainInterface extends JFrame {
                     try {
                         usuarioService.removerUsuario(vendedorId);
                         JOptionPane.showMessageDialog(this, "Vendedor removido com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-                        showListaVendedoresPanel(); 
+                        showListaVendedoresPanel();
                     } catch (Exception ex) {
                         JOptionPane.showMessageDialog(this, "Erro ao remover vendedor: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
                     }
@@ -1147,404 +1077,17 @@ public class MainInterface extends JFrame {
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(BorderFactory.createTitledBorder("Lista de Vendedores"));
         
-        panelPrincipal.add(filterPanel, BorderLayout.NORTH);
-        panelPrincipal.add(scrollPane, BorderLayout.CENTER);
-        panelPrincipal.add(buttonPanel, BorderLayout.SOUTH);
-        panelPrincipal.revalidate();
-        panelPrincipal.repaint();
-    }
-    
-    
-    private void showCadastroPedidoPanel() {
-        panelPrincipal.removeAll();
-        
-        JPanel cadastroPanel = new JPanel(new BorderLayout());
-        cadastroPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        
-        JLabel titleLabel = new JLabel("🛒 CADASTRO DE PEDIDO", SwingConstants.CENTER);
-        titleLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 18));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
-        
-        JPanel formPanel = new JPanel(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
-        gbc.anchor = GridBagConstraints.WEST;
-        
-        JTextField nomeClienteField = new JTextField(20);
-        JComboBox<String> formaPagamentoCombo = new JComboBox<>(new String[]{
-            "Dinheiro", "Cartão de Crédito", "Cartão de Débito", "PIX"
-        });
-        JComboBox<String> modalidadeEntregaCombo = new JComboBox<>(new String[]{
-            "Balcão", "Delivery", "Drive-thru"
-        });
-        JTextField taxaEntregaField = new JTextField("0.00", 10);
-        JTextField taxaServicoField = new JTextField("0.00", 10);
-        
-        gbc.gridx = 0; gbc.gridy = 0;
-        formPanel.add(new JLabel("Nome do Cliente:"), gbc);
-        gbc.gridx = 1;
-        formPanel.add(nomeClienteField, gbc);
-        
-        gbc.gridx = 0; gbc.gridy = 1;
-        formPanel.add(new JLabel("Forma de Pagamento:"), gbc);
-        gbc.gridx = 1;
-        formPanel.add(formaPagamentoCombo, gbc);
-        
-        gbc.gridx = 0; gbc.gridy = 2;
-        formPanel.add(new JLabel("Modalidade de Entrega:"), gbc);
-        gbc.gridx = 1;
-        formPanel.add(modalidadeEntregaCombo, gbc);
-        
-        gbc.gridx = 0; gbc.gridy = 3;
-        formPanel.add(new JLabel("Taxa de Entrega (R$):"), gbc);
-        gbc.gridx = 1;
-        formPanel.add(taxaEntregaField, gbc);
-        
-        gbc.gridx = 0; gbc.gridy = 4;
-        formPanel.add(new JLabel("Taxa de Serviço (R$):"), gbc);
-        gbc.gridx = 1;
-        formPanel.add(taxaServicoField, gbc);
-        
-        JPanel itensPanel = new JPanel(new BorderLayout());
-        itensPanel.setBorder(BorderFactory.createTitledBorder("Itens do Pedido"));
-        
-        DefaultListModel<String> itensModel = new DefaultListModel<>();
-        JList<String> itensList = new JList<>(itensModel);
-        itensList.setVisibleRowCount(5);
-        JScrollPane itensScrollPane = new JScrollPane(itensList);
-        
-        JPanel addItemPanel = new JPanel(new FlowLayout());
-        JComboBox<Produto> produtoCombo = new JComboBox<>();
-        JTextField quantidadeField = new JTextField("1", 5);
-        JButton addItemBtn = new JButton("Adicionar Item");
-        
-        try {
-            ProdutoService produtoService = new ProdutoService();
-            java.util.List<Produto> produtos = produtoService.listarProdutos();
-            for (Produto produto : produtos) {
-                if (produto.getEstoque() > 0) {
-                    produtoCombo.addItem(produto);
-                }
-            }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erro ao carregar produtos: " + e.getMessage());
-        }
-        
-        java.util.List<ItemPedido> itensTemporarios = new ArrayList<>();
-        
-        addItemBtn.addActionListener(e -> {
-            try {
-                Produto produtoSelecionado = (Produto) produtoCombo.getSelectedItem();
-                int quantidade = Integer.parseInt(quantidadeField.getText());
-                
-                if (produtoSelecionado == null) {
-                    JOptionPane.showMessageDialog(this, "Selecione um produto");
-                    return;
-                }
-                
-                if (quantidade <= 0) {
-                    JOptionPane.showMessageDialog(this, "Quantidade deve ser maior que zero");
-                    return;
-                }
-                
-                if (quantidade > produtoSelecionado.getEstoque()) {
-                    JOptionPane.showMessageDialog(this, 
-                        "Quantidade indisponível. Estoque: " + produtoSelecionado.getEstoque());
-                    return;
-                }
-                
-                ItemPedido item = new ItemPedido(produtoSelecionado, quantidade);
-                itensTemporarios.add(item);
-                
-                String itemText = String.format("%s - Qtd: %d - R$ %.2f (Subtotal: R$ %.2f)",
-                    produtoSelecionado.getNome(), quantidade, produtoSelecionado.getPreco(),
-                    item.getSubtotal());
-                itensModel.addElement(itemText);
-                
-                quantidadeField.setText("1");
-                
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this, "Quantidade deve ser um número válido");
-            }
-        });
-        
-        addItemPanel.add(new JLabel("Produto:"));
-        addItemPanel.add(produtoCombo);
-        addItemPanel.add(new JLabel("Quantidade:"));
-        addItemPanel.add(quantidadeField);
-        addItemPanel.add(addItemBtn);
-        
-        JButton removeItemBtn = new JButton("Remover Item Selecionado");
-        removeItemBtn.addActionListener(e -> {
-            int selectedIndex = itensList.getSelectedIndex();
-            if (selectedIndex >= 0) {
-                itensTemporarios.remove(selectedIndex);
-                itensModel.remove(selectedIndex);
-            }
-        });
-        
-        itensPanel.add(addItemPanel, BorderLayout.NORTH);
-        itensPanel.add(itensScrollPane, BorderLayout.CENTER);
-        itensPanel.add(removeItemBtn, BorderLayout.SOUTH);
-        
-        JPanel buttonPanel = new JPanel(new FlowLayout());
-        JButton salvarBtn = new JButton("Salvar Pedido");
-        JButton cancelarBtn = new JButton("Cancelar");
-        
-        salvarBtn.addActionListener(e -> {
-            try {
-                if (nomeClienteField.getText().trim().isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "Nome do cliente é obrigatório");
-                    return;
-                }
-                
-                if (itensTemporarios.isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "Adicione pelo menos um item ao pedido");
-                    return;
-                }
-                
-                Vendedor vendedor = new Vendedor("Carlos Lima", "777.888.999-00", "carlos@test.com", "123456", 1L);
-                vendedor.setId(10L);
-                Gerente gerente = new Gerente("Ana Silva", "111.222.333-44", "ana@test.com", "123456", null);;
-                Franquia franquia = new Franquia("Teste", new Endereco("Rua", "jf", "mg", "00000-000"), gerente);
-                Pedido pedido = new Pedido(new Cliente(nomeClienteField.getText(), "000.000.000-00", "99999-9999", new Endereco("Rua", "sp", "sp", "00000-000")), 
-                        vendedor, franquia);
-                pedido.setFormaPagamento((String) formaPagamentoCombo.getSelectedItem());
-                pedido.setModalidadeEntrega((String) modalidadeEntregaCombo.getSelectedItem());
-                
-                try {
-                    pedido.setTaxaEntrega(Double.parseDouble(taxaEntregaField.getText()));
-                    pedido.setTaxaServico(Double.parseDouble(taxaServicoField.getText()));
-                } catch (NumberFormatException ex) {
-                    JOptionPane.showMessageDialog(this, "Valores de taxa devem ser números válidos");
-                    return;
-                }
-                
-                if (!(usuarioLogado instanceof Vendedor)) {
-                    JOptionPane.showMessageDialog(this, "Apenas vendedores podem cadastrar pedidos");
-                    return;
-                }
-                
-                pedido.setVendedor((Vendedor) usuarioLogado);
-                pedido.getFranquia().setId(((Vendedor) usuarioLogado).getId());
-                
-                for (ItemPedido item : itensTemporarios) {
-                    pedido.adicionarItem(item);
-                }
-                
-                PedidoService pedidoService = new PedidoService();
-                pedidoService.cadastrar(pedido);
-                
-                JOptionPane.showMessageDialog(this, 
-                    String.format("Pedido cadastrado com sucesso!\nTotal: R$ %.2f", pedido.getValorTotal()));
-                showWelcomePanel();
-                
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Erro ao salvar pedido: " + ex.getMessage());
-            }
-        });
-        
-        cancelarBtn.addActionListener(e -> showWelcomePanel());
-        
-        buttonPanel.add(salvarBtn);
-        buttonPanel.add(cancelarBtn);
-        
-        JPanel centerPanel = new JPanel(new BorderLayout());
-        centerPanel.add(formPanel, BorderLayout.NORTH);
-        centerPanel.add(itensPanel, BorderLayout.CENTER);
-        
-        cadastroPanel.add(titleLabel, BorderLayout.NORTH);
-        cadastroPanel.add(centerPanel, BorderLayout.CENTER);
-        cadastroPanel.add(buttonPanel, BorderLayout.SOUTH);
-        
-        panelPrincipal.add(cadastroPanel, BorderLayout.CENTER);
-        panelPrincipal.revalidate();
-        panelPrincipal.repaint();
-    }
-    
-    private void showMeusPedidosPanel() {
-        panelPrincipal.removeAll();
-        
-        JPanel meusPanel = new JPanel(new BorderLayout());
-        meusPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        
-        JLabel titleLabel = new JLabel("🛍️ MEUS PEDIDOS", SwingConstants.CENTER);
-        titleLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 18));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
-        
-        JPanel statsPanel = new JPanel(new GridLayout(1, 4, 10, 10));
-        statsPanel.setBorder(BorderFactory.createTitledBorder("Minhas Estatísticas"));
-        
-        JLabel totalPedidosLabel = new JLabel("0", SwingConstants.CENTER);
-        JLabel pedidosEntreguesLabel = new JLabel("0", SwingConstants.CENTER);
-        JLabel faturamentoLabel = new JLabel("R$ 0,00", SwingConstants.CENTER);
-        JLabel ticketMedioLabel = new JLabel("R$ 0,00", SwingConstants.CENTER);
-        
-        totalPedidosLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 16));
-        pedidosEntreguesLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 16));
-        faturamentoLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 16));
-        ticketMedioLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 16));
-        
-        JPanel totalPanel = new JPanel(new BorderLayout());
-        totalPanel.add(new JLabel("Total de Pedidos", SwingConstants.CENTER), BorderLayout.NORTH);
-        totalPanel.add(totalPedidosLabel, BorderLayout.CENTER);
-        
-        JPanel entreguesPanel = new JPanel(new BorderLayout());
-        entreguesPanel.add(new JLabel("Pedidos Entregues", SwingConstants.CENTER), BorderLayout.NORTH);
-        entreguesPanel.add(pedidosEntreguesLabel, BorderLayout.CENTER);
-        
-        JPanel faturamentoPanel = new JPanel(new BorderLayout());
-        faturamentoPanel.add(new JLabel("Faturamento Total", SwingConstants.CENTER), BorderLayout.NORTH);
-        faturamentoPanel.add(faturamentoLabel, BorderLayout.CENTER);
-        
-        JPanel ticketPanel = new JPanel(new BorderLayout());
-        ticketPanel.add(new JLabel("Ticket Médio", SwingConstants.CENTER), BorderLayout.NORTH);
-        ticketPanel.add(ticketMedioLabel, BorderLayout.CENTER);
-        
-        statsPanel.add(totalPanel);
-        statsPanel.add(entreguesPanel);
-        statsPanel.add(faturamentoPanel);
-        statsPanel.add(ticketPanel);
-        
-        String[] columnNames = {"ID", "Cliente", "Data", "Status", "Valor Total"};
-        DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
-        
-        JTable pedidosTable = new JTable(tableModel);
-        pedidosTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        JScrollPane scrollPane = new JScrollPane(pedidosTable);
-        
-        Runnable carregarDados = () -> {
-            try {
-                if (!(usuarioLogado instanceof Vendedor)) {
-                    JOptionPane.showMessageDialog(this, "Esta funcionalidade é apenas para vendedores");
-                    return;
-                }
-                
-                PedidoService pedidoService = new PedidoService();
-                java.util.List<Pedido> meusPedidos = pedidoService.listarPedidosPorVendedor((Vendedor) usuarioLogado);
-                
-                tableModel.setRowCount(0);
-                for (Pedido pedido : meusPedidos) {
-                    Object[] row = {
-                        pedido.getId(),
-                        pedido.getNomeCliente(),
-                        pedido.getDataCriacao().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")),
-                        pedido.getStatus(),
-                        String.format("R$ %.2f", pedido.getValorTotal())
-                    };
-                    tableModel.addRow(row);
-                }
-                
-                int totalPedidos = meusPedidos.size();
-                long pedidosEntregues = meusPedidos.stream()
-                    .filter(p -> p.getStatus() == Pedido.StatusPedido.ENTREGUE)
-                    .count();
-                
-                double faturamentoTotal = meusPedidos.stream()
-                    .filter(p -> p.getStatus() == Pedido.StatusPedido.ENTREGUE)
-                    .mapToDouble(Pedido::getValorTotal)
-                    .sum();
-                
-                double ticketMedio = pedidosEntregues > 0 ? faturamentoTotal / pedidosEntregues : 0.0;
-                
-                totalPedidosLabel.setText(String.valueOf(totalPedidos));
-                pedidosEntreguesLabel.setText(String.valueOf(pedidosEntregues));
-                faturamentoLabel.setText(String.format("R$ %.2f", faturamentoTotal));
-                ticketMedioLabel.setText(String.format("R$ %.2f", ticketMedio));
-                
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(MainInterface.this, "Erro ao carregar dados: " + e.getMessage());
-            }
-        };
-        
-        carregarDados.run();
-        
-        JPanel actionsPanel = new JPanel(new FlowLayout());
-        JButton atualizarBtn = new JButton("Atualizar");
-        JButton novoBtn = new JButton("Novo Pedido");
-        
-        atualizarBtn.addActionListener(e -> carregarDados.run());
-        novoBtn.addActionListener(e -> showCadastroPedidoPanel());
-        
-        actionsPanel.add(atualizarBtn);
-        actionsPanel.add(novoBtn);
-        
-        JPanel detailsPanel = new JPanel(new BorderLayout());
-        detailsPanel.setBorder(BorderFactory.createTitledBorder("Detalhes do Pedido Selecionado"));
-        
-        JTextArea detailsArea = new JTextArea(6, 40);
-        detailsArea.setEditable(false);
-        detailsArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
-        JScrollPane detailsScrollPane = new JScrollPane(detailsArea);
-        detailsPanel.add(detailsScrollPane);
-        
-        pedidosTable.getSelectionModel().addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) {
-                int selectedRow = pedidosTable.getSelectedRow();
-                if (selectedRow >= 0) {
-                    try {
-                        Long pedidoId = (Long) tableModel.getValueAt(selectedRow, 0);
-                        PedidoService pedidoService = new PedidoService();
-                        Pedido pedido = pedidoService.buscarPorId(pedidoId);
-                        
-                        StringBuilder details = new StringBuilder();
-                        details.append("PEDIDO #").append(pedido.getId()).append(" - ").append(pedido.getStatus()).append("\n");
-                        details.append("Cliente: ").append(pedido.getNomeCliente()).append("\n");
-                        details.append("Data: ").append(pedido.getDataCriacao().format(
-                            java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))).append("\n");
-                        details.append("Forma Pagamento: ").append(pedido.getFormaPagamento()).append("\n");
-                        details.append("Entrega: ").append(pedido.getModalidadeEntrega()).append("\n\n");
-                        
-                        details.append("ITENS:\n");
-                        for (ItemPedido item : pedido.getItens()) {
-                            details.append(String.format("• %s (Qtd: %d) - R$ %.2f\n", 
-                                item.getProduto().getNome(), item.getQuantidade(), item.getSubtotal()));
-                        }
-                        
-                        details.append(String.format("\nTOTAL: R$ %.2f", pedido.getValorTotal()));
-                        
-                        detailsArea.setText(details.toString());
-                        detailsArea.setCaretPosition(0);
-                        
-                    } catch (Exception ex) {
-                        detailsArea.setText("Erro ao carregar detalhes: " + ex.getMessage());
-                    }
-                }
-            }
-        });
-        
-        JPanel buttonPanel = new JPanel(new FlowLayout());
-        JButton voltarBtn = new JButton("Voltar");
-        voltarBtn.addActionListener(e -> showWelcomePanel());
-        buttonPanel.add(voltarBtn);
-        
-        JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.add(titleLabel, BorderLayout.NORTH);
-        topPanel.add(statsPanel, BorderLayout.CENTER);
-        topPanel.add(actionsPanel, BorderLayout.SOUTH);
-        
-        JPanel centerPanel = new JPanel(new BorderLayout());
-        centerPanel.add(scrollPane, BorderLayout.CENTER);
-        centerPanel.add(detailsPanel, BorderLayout.SOUTH);
-        
-        meusPanel.add(topPanel, BorderLayout.NORTH);
-        meusPanel.add(centerPanel, BorderLayout.CENTER);
-        meusPanel.add(buttonPanel, BorderLayout.SOUTH);
-        
-        panelPrincipal.add(meusPanel, BorderLayout.CENTER);
-        panelPrincipal.revalidate();
-        panelPrincipal.repaint();
+        contentPanel.add(filterPanel, BorderLayout.NORTH);
+        contentPanel.add(scrollPane, BorderLayout.CENTER);
+        contentPanel.add(buttonPanel, BorderLayout.SOUTH);
+        contentPanel.revalidate();
+        contentPanel.repaint();
     }
     
     private void showRankingVendedoresPanel() {
-        panelPrincipal.removeAll();
+        contentPanel.removeAll();
         
-        java.util.List<Vendedor> vendedores = usuarioService.listarVendedores();
+        List<Vendedor> vendedores = usuarioService.listarVendedores();
         
         vendedores.sort((v1, v2) -> Double.compare(v2.getTotalVendas(), v1.getTotalVendas()));
         
@@ -1602,7 +1145,7 @@ public class MainInterface extends JFrame {
         franquiaCombo.addItem("Todas as franquias");
         
         try {
-            franquiaService.listar().forEach(f -> 
+            franquiaService.listarFranquias().forEach(f -> 
                 franquiaCombo.addItem(f.getId() + " - " + f.getNome())
             );
         } catch (Exception e) {
@@ -1610,7 +1153,7 @@ public class MainInterface extends JFrame {
         
         franquiaCombo.addActionListener(e -> {
             String selected = (String) franquiaCombo.getSelectedItem();
-            java.util.List<Vendedor> vendedoresFiltrados;
+            List<Vendedor> vendedoresFiltrados;
             
             if ("Todas as franquias".equals(selected)) {
                 vendedoresFiltrados = usuarioService.listarVendedores();
@@ -1687,15 +1230,15 @@ public class MainInterface extends JFrame {
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(BorderFactory.createTitledBorder("Ranking de Vendedores"));
         
-        panelPrincipal.add(topPanel, BorderLayout.NORTH);
-        panelPrincipal.add(scrollPane, BorderLayout.CENTER);
-        panelPrincipal.add(buttonPanel, BorderLayout.SOUTH);
-        panelPrincipal.revalidate();
-        panelPrincipal.repaint();
+        contentPanel.add(topPanel, BorderLayout.NORTH);
+        contentPanel.add(scrollPane, BorderLayout.CENTER);
+        contentPanel.add(buttonPanel, BorderLayout.SOUTH);
+        contentPanel.revalidate();
+        contentPanel.repaint();
     }
     
     private void showCadastroProdutoPanel() {
-        panelPrincipal.removeAll();
+        contentPanel.removeAll();
         
         JPanel formPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -1771,7 +1314,7 @@ public class MainInterface extends JFrame {
                 int estoque = Integer.parseInt(estoqueText);
                 int estoqueMin = Integer.parseInt(estoqueMinText);
                 
-                produtoService.cadastrar(new Produto(nome, descricao, preco, estoque, estoqueMin, categoria));
+                produtoService.cadastrarProduto(nome, descricao, preco, estoque, estoqueMin, categoria);
                 JOptionPane.showMessageDialog(this, "Produto cadastrado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
                 
                 nomeField.setText("");
@@ -1796,15 +1339,15 @@ public class MainInterface extends JFrame {
         gbc.gridx = 0; gbc.gridy = 7; gbc.gridwidth = 2;
         formPanel.add(buttonPanel, gbc);
         
-        panelPrincipal.add(formPanel, BorderLayout.CENTER);
-        panelPrincipal.revalidate();
-        panelPrincipal.repaint();
+        contentPanel.add(formPanel, BorderLayout.CENTER);
+        contentPanel.revalidate();
+        contentPanel.repaint();
     }
     
     private void showListaProdutosPanel() {
-        panelPrincipal.removeAll();
+        contentPanel.removeAll();
         
-        java.util.List<Produto> produtos = produtoService.listarProdutos();
+        List<Produto> produtos = produtoService.listarProdutos();
         
         String[] columnNames = {"ID", "Nome", "Categoria", "Preço", "Estoque", "Est. Mín.", "Status"};
         Object[][] data = new Object[produtos.size()][7];
@@ -1822,7 +1365,7 @@ public class MainInterface extends JFrame {
         
         JTable table = new JTable(data, columnNames);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        table.setDefaultEditor(Object.class, null); 
+        table.setDefaultEditor(Object.class, null); // Torna a tabela não editável
         
         table.setDefaultRenderer(Object.class, new javax.swing.table.DefaultTableCellRenderer() {
             @Override
@@ -1831,7 +1374,7 @@ public class MainInterface extends JFrame {
                 
                 String status = (String) table.getValueAt(row, 6);
                 if ("BAIXO".equals(status) && !isSelected) {
-                    c.setBackground(new Color(255, 230, 230));
+                    c.setBackground(new Color(255, 230, 230)); // Vermelho claro
                 } else if (!isSelected) {
                     c.setBackground(Color.WHITE);
                 }
@@ -1852,7 +1395,7 @@ public class MainInterface extends JFrame {
         
         categoriaCombo.addActionListener(e -> {
             String selected = (String) categoriaCombo.getSelectedItem();
-            java.util.List<Produto> produtosFiltrados;
+            List<Produto> produtosFiltrados;
             
             if ("Todas as categorias".equals(selected)) {
                 produtosFiltrados = produtoService.listarProdutos();
@@ -1911,9 +1454,9 @@ public class MainInterface extends JFrame {
                 
                 if (confirm == JOptionPane.YES_OPTION) {
                     try {
-                        produtoService.remover(produtoId);
+                        produtoService.removerProduto(produtoId);
                         JOptionPane.showMessageDialog(this, "Produto removido com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-                        showListaProdutosPanel();
+                        showListaProdutosPanel(); // Recarregar lista
                     } catch (Exception ex) {
                         JOptionPane.showMessageDialog(this, "Erro ao remover produto: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
                     }
@@ -1939,7 +1482,7 @@ public class MainInterface extends JFrame {
                         int novoEstoque = Integer.parseInt(novoEstoqueStr.trim());
                         produtoService.atualizarEstoque(produtoId, novoEstoque);
                         JOptionPane.showMessageDialog(this, "Estoque atualizado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-                        showListaProdutosPanel();
+                        showListaProdutosPanel(); // Recarregar lista
                     } catch (NumberFormatException ex) {
                         JOptionPane.showMessageDialog(this, "Por favor, digite um número válido", "Erro", JOptionPane.ERROR_MESSAGE);
                     } catch (Exception ex) {
@@ -1961,17 +1504,17 @@ public class MainInterface extends JFrame {
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(BorderFactory.createTitledBorder("Lista de Produtos"));
         
-        panelPrincipal.add(filterPanel, BorderLayout.NORTH);
-        panelPrincipal.add(scrollPane, BorderLayout.CENTER);
-        panelPrincipal.add(buttonPanel, BorderLayout.SOUTH);
-        panelPrincipal.revalidate();
-        panelPrincipal.repaint();
+        contentPanel.add(filterPanel, BorderLayout.NORTH);
+        contentPanel.add(scrollPane, BorderLayout.CENTER);
+        contentPanel.add(buttonPanel, BorderLayout.SOUTH);
+        contentPanel.revalidate();
+        contentPanel.repaint();
     }
     
     private void showEstoqueBaixoPanel() {
-        panelPrincipal.removeAll();
+        contentPanel.removeAll();
         
-        java.util.List<Produto> produtosEstoqueBaixo = produtoService.listarProdutosEstoqueBaixo();
+        List<Produto> produtosEstoqueBaixo = produtoService.listarProdutosEstoqueBaixo();
         
         if (produtosEstoqueBaixo.isEmpty()) {
             JLabel msgLabel = new JLabel("Nenhum produto com estoque baixo encontrado!", SwingConstants.CENTER);
@@ -1988,7 +1531,7 @@ public class MainInterface extends JFrame {
             buttonPanel.add(voltarBtn);
             msgPanel.add(buttonPanel, BorderLayout.SOUTH);
             
-            panelPrincipal.add(msgPanel, BorderLayout.CENTER);
+            contentPanel.add(msgPanel, BorderLayout.CENTER);
         } else {
             String[] columnNames = {"ID", "Nome", "Categoria", "Estoque Atual", "Estoque Mínimo", "Diferença"};
             Object[][] data = new Object[produtosEstoqueBaixo.size()][6];
@@ -2005,7 +1548,7 @@ public class MainInterface extends JFrame {
             
             JTable table = new JTable(data, columnNames);
             table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-            table.setDefaultEditor(Object.class, null); 
+            table.setDefaultEditor(Object.class, null); // Torna a tabela não editável
             
             table.setDefaultRenderer(Object.class, new javax.swing.table.DefaultTableCellRenderer() {
                 @Override
@@ -2013,7 +1556,7 @@ public class MainInterface extends JFrame {
                     Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                     
                     if (!isSelected) {
-                        c.setBackground(new Color(255, 230, 230));
+                        c.setBackground(new Color(255, 230, 230)); // Vermelho claro
                     }
                     
                     return c;
@@ -2050,14 +1593,14 @@ public class MainInterface extends JFrame {
                     String novoEstoqueStr = JOptionPane.showInputDialog(this, 
                         "Novo estoque para '" + nomeProduto + "':\n" +
                         "Atual: " + estoqueAtual + " | Mínimo: " + estoqueMinimo, 
-                        estoqueMinimo + 10); 
+                        estoqueMinimo + 10); // Sugestão de estoque
                     
                     if (novoEstoqueStr != null && !novoEstoqueStr.trim().isEmpty()) {
                         try {
                             int novoEstoque = Integer.parseInt(novoEstoqueStr.trim());
                             produtoService.atualizarEstoque(produtoId, novoEstoque);
                             JOptionPane.showMessageDialog(this, "Estoque atualizado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-                            showEstoqueBaixoPanel(); 
+                            showEstoqueBaixoPanel(); // Recarregar lista
                         } catch (NumberFormatException ex) {
                             JOptionPane.showMessageDialog(this, "Por favor, digite um número válido", "Erro", JOptionPane.ERROR_MESSAGE);
                         } catch (Exception ex) {
@@ -2079,17 +1622,17 @@ public class MainInterface extends JFrame {
             JScrollPane scrollPane = new JScrollPane(table);
             scrollPane.setBorder(BorderFactory.createTitledBorder("Produtos com Estoque Baixo"));
             
-            panelPrincipal.add(alertPanel, BorderLayout.NORTH);
-            panelPrincipal.add(scrollPane, BorderLayout.CENTER);
-            panelPrincipal.add(buttonPanel, BorderLayout.SOUTH);
+            contentPanel.add(alertPanel, BorderLayout.NORTH);
+            contentPanel.add(scrollPane, BorderLayout.CENTER);
+            contentPanel.add(buttonPanel, BorderLayout.SOUTH);
         }
         
-        panelPrincipal.revalidate();
-        panelPrincipal.repaint();
+        contentPanel.revalidate();
+        contentPanel.repaint();
     }
     
     private void showListaPedidosPanel() {
-        panelPrincipal.removeAll();
+        contentPanel.removeAll();
         
         JPanel listaPanel = new JPanel(new BorderLayout());
         listaPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -2126,7 +1669,7 @@ public class MainInterface extends JFrame {
             try {
                 tableModel.setRowCount(0);
                 PedidoService pedidoService = new PedidoService();
-                java.util.List<Pedido> pedidos;
+                List<Pedido> pedidos;
                 
                 String statusSelecionado = (String) statusFilter.getSelectedItem();
                 if ("Todos".equals(statusSelecionado)) {
@@ -2135,7 +1678,7 @@ public class MainInterface extends JFrame {
                     } else if (usuarioLogado instanceof Gerente) {
                         pedidos = pedidoService.listarPedidosPorFranquia(((Gerente) usuarioLogado).getFranquiaId());
                     } else {
-                        pedidos = pedidoService.listar();
+                        pedidos = pedidoService.listarTodos();
                     }
                 } else {
                     Pedido.StatusPedido status = Pedido.StatusPedido.valueOf(statusSelecionado);
@@ -2147,7 +1690,7 @@ public class MainInterface extends JFrame {
                             .collect(java.util.stream.Collectors.toList());
                     } else if (usuarioLogado instanceof Gerente) {
                         pedidos = pedidos.stream()
-                            .filter(p -> p.getFranquia().getId().equals(((Gerente) usuarioLogado).getFranquiaId()))
+                            .filter(p -> p.getFranquiaId().equals(((Gerente) usuarioLogado).getFranquiaId()))
                             .collect(java.util.stream.Collectors.toList());
                     }
                 }
@@ -2156,9 +1699,9 @@ public class MainInterface extends JFrame {
                     Object[] row = {
                         pedido.getId(),
                         pedido.getNomeCliente(),
-                        pedido.getDataCriacao().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")),
+                        pedido.getDataHora().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")),
                         pedido.getStatus(),
-                        String.format("R$ %.2f", pedido.getValorTotal()),
+                        String.format("R$ %.2f", pedido.getTotal()),
                         pedido.getVendedor().getNome()
                     };
                     tableModel.addRow(row);
@@ -2227,7 +1770,7 @@ public class MainInterface extends JFrame {
                         StringBuilder details = new StringBuilder();
                         details.append("PEDIDO #").append(pedido.getId()).append("\n");
                         details.append("Cliente: ").append(pedido.getNomeCliente()).append("\n");
-                        details.append("Data/Hora: ").append(pedido.getDataCriacao().format(
+                        details.append("Data/Hora: ").append(pedido.getDataHora().format(
                             java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"))).append("\n");
                         details.append("Vendedor: ").append(pedido.getVendedor().getNome()).append("\n");
                         details.append("Status: ").append(pedido.getStatus()).append("\n");
@@ -2250,7 +1793,7 @@ public class MainInterface extends JFrame {
                         details.append(String.format("Subtotal: R$ %.2f\n", pedido.getSubtotal()));
                         details.append(String.format("Taxa de Entrega: R$ %.2f\n", pedido.getTaxaEntrega()));
                         details.append(String.format("Taxa de Serviço: R$ %.2f\n", pedido.getTaxaServico()));
-                        details.append(String.format("TOTAL: R$ %.2f", pedido.getValorTotal()));
+                        details.append(String.format("TOTAL: R$ %.2f", pedido.getTotal()));
                         
                         detailsArea.setText(details.toString());
                         detailsArea.setCaretPosition(0);
@@ -2279,29 +1822,13 @@ public class MainInterface extends JFrame {
         listaPanel.add(centerPanel, BorderLayout.CENTER);
         listaPanel.add(buttonPanel, BorderLayout.SOUTH);
         
-        panelPrincipal.add(listaPanel, BorderLayout.CENTER);
-        panelPrincipal.revalidate();
-        panelPrincipal.repaint();
-    }
-    
-    private JPanel createStatLabel(String title, String value) {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBorder(BorderFactory.createEtchedBorder());
-        
-        JLabel titleLabel = new JLabel(title, SwingConstants.CENTER);
-        titleLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
-        
-        JLabel valueLabel = new JLabel(value, SwingConstants.CENTER);
-        valueLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 14));
-        
-        panel.add(titleLabel, BorderLayout.NORTH);
-        panel.add(valueLabel, BorderLayout.CENTER);
-        
-        return panel;
+        contentPanel.add(listaPanel, BorderLayout.CENTER);
+        contentPanel.revalidate();
+        contentPanel.repaint();
     }
     
     private void showRelatorioFranquiaPanel() {
-        panelPrincipal.removeAll();
+        contentPanel.removeAll();
         
         JPanel relatorioPanel = new JPanel(new BorderLayout());
         relatorioPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -2319,7 +1846,7 @@ public class MainInterface extends JFrame {
             } else if (usuarioLogado instanceof Gerente) {
                 franquiaId = ((Gerente) usuarioLogado).getFranquiaId();
             } else {
-                java.util.List<Franquia> franquias = franquiaService.listar();
+                List<Franquia> franquias = franquiaService.listarFranquias();
                 if (!franquias.isEmpty()) {
                     franquiaId = franquias.get(0).getId();
                 } else {
@@ -2330,7 +1857,7 @@ public class MainInterface extends JFrame {
             Franquia franquia = franquiaService.buscarFranquiaPorId(franquiaId);
             
             PedidoService pedidoService = new PedidoService();
-            java.util.List<Pedido> pedidosFranquia = pedidoService.listarPedidosPorFranquia(franquiaId);
+            List<Pedido> pedidosFranquia = pedidoService.listarPedidosPorFranquia(franquiaId);
             
             JPanel infoPanel = new JPanel(new GridBagLayout());
             infoPanel.setBorder(BorderFactory.createTitledBorder("Informações da Franquia"));
@@ -2352,7 +1879,7 @@ public class MainInterface extends JFrame {
             gbc.gridx = 0; gbc.gridy = 2;
             infoPanel.add(new JLabel("Cidade:"), gbc);
             gbc.gridx = 1;
-            infoPanel.add(new JLabel(franquia.getEndereco().getCidade() + " - " + franquia.getEndereco().getEstado()), gbc);
+            infoPanel.add(new JLabel(franquia.getCidade() + " - " + franquia.getEstado()), gbc);
             
             JPanel statsPanel = new JPanel(new GridLayout(2, 4, 10, 10));
             statsPanel.setBorder(BorderFactory.createTitledBorder("Estatísticas de Pedidos"));
@@ -2365,13 +1892,13 @@ public class MainInterface extends JFrame {
             
             double faturamentoTotal = pedidosFranquia.stream()
                 .filter(p -> p.getStatus() == Pedido.StatusPedido.ENTREGUE)
-                .mapToDouble(Pedido::getValorTotal)
+                .mapToDouble(Pedido::getTotal)
                 .sum();
             
             double ticketMedio = entregues > 0 ? faturamentoTotal / entregues : 0.0;
             
             long pedidosHoje = pedidosFranquia.stream()
-                .filter(p -> p.getDataCriacao().toLocalDate().equals(java.time.LocalDate.now()))
+                .filter(p -> p.getDataHora().toLocalDate().equals(java.time.LocalDate.now()))
                 .count();
             
             statsPanel.add(createStatLabel("Total de Pedidos", String.valueOf(totalPedidos)));
@@ -2398,17 +1925,18 @@ public class MainInterface extends JFrame {
             JScrollPane vendedorScrollPane = new JScrollPane(vendedorTable);
             vendedorScrollPane.setPreferredSize(new Dimension(0, 150));
             
-            Map<Vendedor, java.util.List<Pedido>> pedidosPorVendedor = pedidosFranquia.stream()
+            // Agrupar pedidos por vendedor
+            Map<Vendedor, List<Pedido>> pedidosPorVendedor = pedidosFranquia.stream()
                 .collect(java.util.stream.Collectors.groupingBy(Pedido::getVendedor));
             
-            for (Map.Entry<Vendedor, java.util.List<Pedido>> entry : pedidosPorVendedor.entrySet()) {
+            for (Map.Entry<Vendedor, List<Pedido>> entry : pedidosPorVendedor.entrySet()) {
                 Vendedor vendedor = entry.getKey();
-                java.util.List<Pedido> pedidosVendedor = entry.getValue();
+                List<Pedido> pedidosVendedor = entry.getValue();
                 
                 int pedidosCount = pedidosVendedor.size();
                 double faturamentoVendedor = pedidosVendedor.stream()
                     .filter(p -> p.getStatus() == Pedido.StatusPedido.ENTREGUE)
-                    .mapToDouble(Pedido::getValorTotal)
+                    .mapToDouble(Pedido::getTotal)
                     .sum();
                 
                 long entreguesVendedor = pedidosVendedor.stream()
@@ -2444,7 +1972,7 @@ public class MainInterface extends JFrame {
             recentesScrollPane.setPreferredSize(new Dimension(0, 200));
             
             pedidosFranquia.stream()
-                .sorted((p1, p2) -> p2.getDataCriacao().compareTo(p1.getDataCriacao()))
+                .sorted((p1, p2) -> p2.getDataHora().compareTo(p1.getDataHora()))
                 .limit(10)
                 .forEach(pedido -> {
                     Object[] row = {
@@ -2452,8 +1980,8 @@ public class MainInterface extends JFrame {
                         pedido.getNomeCliente(),
                         pedido.getVendedor().getNome(),
                         pedido.getStatus(),
-                        String.format("R$ %.2f", pedido.getValorTotal()),
-                        pedido.getDataCriacao().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM HH:mm"))
+                        String.format("R$ %.2f", pedido.getTotal()),
+                        pedido.getDataHora().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM HH:mm"))
                     };
                     recentesModel.addRow(row);
                 });
@@ -2480,10 +2008,10 @@ public class MainInterface extends JFrame {
                     relatorio.append("Ticket Médio: R$ ").append(String.format("%.2f", ticketMedio)).append("\n\n");
                     
                     relatorio.append("DESEMPENHO POR VENDEDOR:\n");
-                    for (Map.Entry<Vendedor, java.util.List<Pedido>> entry : pedidosPorVendedor.entrySet()) {
+                    for (Map.Entry<Vendedor, List<Pedido>> entry : pedidosPorVendedor.entrySet()) {
                         Vendedor v = entry.getKey();
-                        java.util.List<Pedido> pv = entry.getValue();
-                        double fv = pv.stream().filter(p -> p.getStatus() == Pedido.StatusPedido.ENTREGUE).mapToDouble(Pedido::getValorTotal).sum();
+                        List<Pedido> pv = entry.getValue();
+                        double fv = pv.stream().filter(p -> p.getStatus() == Pedido.StatusPedido.ENTREGUE).mapToDouble(Pedido::getTotal).sum();
                         relatorio.append("- ").append(v.getNome()).append(": ").append(pv.size()).append(" pedidos, R$ ").append(String.format("%.2f", fv)).append("\n");
                     }
                     
@@ -2541,15 +2069,472 @@ public class MainInterface extends JFrame {
             relatorioPanel.add(buttonPanel, BorderLayout.SOUTH);
         }
         
-        panelPrincipal.add(relatorioPanel, BorderLayout.CENTER);
-        panelPrincipal.revalidate();
-        panelPrincipal.repaint();
+        contentPanel.add(relatorioPanel, BorderLayout.CENTER);
+        contentPanel.revalidate();
+        contentPanel.repaint();
     }
     
+    private JPanel createStatLabel(String title, String value) {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createEtchedBorder());
+        
+        JLabel titleLabel = new JLabel(title, SwingConstants.CENTER);
+        titleLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
+        
+        JLabel valueLabel = new JLabel(value, SwingConstants.CENTER);
+        valueLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 14));
+        
+        panel.add(titleLabel, BorderLayout.NORTH);
+        panel.add(valueLabel, BorderLayout.CENTER);
+        
+        return panel;
+    }
+    
+    private void showCadastroPedidoPanel() {
+        contentPanel.removeAll();
+        
+        JPanel cadastroPanel = new JPanel(new BorderLayout());
+        cadastroPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        
+        JLabel titleLabel = new JLabel("🛒 CADASTRO DE PEDIDO", SwingConstants.CENTER);
+        titleLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 18));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
+        
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.anchor = GridBagConstraints.WEST;
+        
+        JTextField nomeClienteField = new JTextField(20);
+        JComboBox<String> formaPagamentoCombo = new JComboBox<>(new String[]{
+            "Dinheiro", "Cartão de Crédito", "Cartão de Débito", "PIX"
+        });
+        JComboBox<String> modalidadeEntregaCombo = new JComboBox<>(new String[]{
+            "Balcão", "Delivery", "Drive-thru"
+        });
+        JTextField taxaEntregaField = new JTextField("0.00", 10);
+        JTextField taxaServicoField = new JTextField("0.00", 10);
+        
+        gbc.gridx = 0; gbc.gridy = 0;
+        formPanel.add(new JLabel("Nome do Cliente:"), gbc);
+        gbc.gridx = 1;
+        formPanel.add(nomeClienteField, gbc);
+        
+        gbc.gridx = 0; gbc.gridy = 1;
+        formPanel.add(new JLabel("Forma de Pagamento:"), gbc);
+        gbc.gridx = 1;
+        formPanel.add(formaPagamentoCombo, gbc);
+        
+        gbc.gridx = 0; gbc.gridy = 2;
+        formPanel.add(new JLabel("Modalidade de Entrega:"), gbc);
+        gbc.gridx = 1;
+        formPanel.add(modalidadeEntregaCombo, gbc);
+        
+        gbc.gridx = 0; gbc.gridy = 3;
+        formPanel.add(new JLabel("Taxa de Entrega (R$):"), gbc);
+        gbc.gridx = 1;
+        formPanel.add(taxaEntregaField, gbc);
+        
+        gbc.gridx = 0; gbc.gridy = 4;
+        formPanel.add(new JLabel("Taxa de Serviço (R$):"), gbc);
+        gbc.gridx = 1;
+        formPanel.add(taxaServicoField, gbc);
+        
+        JPanel itensPanel = new JPanel(new BorderLayout());
+        itensPanel.setBorder(BorderFactory.createTitledBorder("Itens do Pedido"));
+        
+        DefaultListModel<String> itensModel = new DefaultListModel<>();
+        JList<String> itensList = new JList<>(itensModel);
+        itensList.setVisibleRowCount(5);
+        JScrollPane itensScrollPane = new JScrollPane(itensList);
+        
+        JPanel addItemPanel = new JPanel(new FlowLayout());
+        JComboBox<Produto> produtoCombo = new JComboBox<>();
+        JTextField quantidadeField = new JTextField("1", 5);
+        JButton addItemBtn = new JButton("Adicionar Item");
+        
+        try {
+            ProdutoService produtoService = new ProdutoService();
+            List<Produto> produtos = produtoService.listarProdutos();
+            for (Produto produto : produtos) {
+                if (produto.getEstoque() > 0) {
+                    produtoCombo.addItem(produto);
+                }
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erro ao carregar produtos: " + e.getMessage());
+        }
+        
+        List<ItemPedido> itensTemporarios = new ArrayList<>();
+        
+        addItemBtn.addActionListener(e -> {
+            try {
+                Produto produtoSelecionado = (Produto) produtoCombo.getSelectedItem();
+                int quantidade = Integer.parseInt(quantidadeField.getText());
+                
+                if (produtoSelecionado == null) {
+                    JOptionPane.showMessageDialog(this, "Selecione um produto");
+                    return;
+                }
+                
+                if (quantidade <= 0) {
+                    JOptionPane.showMessageDialog(this, "Quantidade deve ser maior que zero");
+                    return;
+                }
+                
+                if (quantidade > produtoSelecionado.getEstoque()) {
+                    JOptionPane.showMessageDialog(this, 
+                        "Quantidade indisponível. Estoque: " + produtoSelecionado.getEstoque());
+                    return;
+                }
+                
+                ItemPedido item = new ItemPedido(produtoSelecionado, quantidade);
+                itensTemporarios.add(item);
+                
+                String itemText = String.format("%s - Qtd: %d - R$ %.2f (Subtotal: R$ %.2f)",
+                    produtoSelecionado.getNome(), quantidade, produtoSelecionado.getPreco(),
+                    item.getSubtotal());
+                itensModel.addElement(itemText);
+                
+                quantidadeField.setText("1");
+                
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Quantidade deve ser um número válido");
+            }
+        });
+        
+        addItemPanel.add(new JLabel("Produto:"));
+        addItemPanel.add(produtoCombo);
+        addItemPanel.add(new JLabel("Quantidade:"));
+        addItemPanel.add(quantidadeField);
+        addItemPanel.add(addItemBtn);
+        
+        JButton removeItemBtn = new JButton("Remover Item Selecionado");
+        removeItemBtn.addActionListener(e -> {
+            int selectedIndex = itensList.getSelectedIndex();
+            if (selectedIndex >= 0) {
+                itensTemporarios.remove(selectedIndex);
+                itensModel.remove(selectedIndex);
+            }
+        });
+        
+        itensPanel.add(addItemPanel, BorderLayout.NORTH);
+        itensPanel.add(itensScrollPane, BorderLayout.CENTER);
+        itensPanel.add(removeItemBtn, BorderLayout.SOUTH);
+        
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        JButton salvarBtn = new JButton("Salvar Pedido");
+        JButton cancelarBtn = new JButton("Cancelar");
+        
+        salvarBtn.addActionListener(e -> {
+            try {
+                if (nomeClienteField.getText().trim().isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Nome do cliente é obrigatório");
+                    return;
+                }
+                
+                if (itensTemporarios.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Adicione pelo menos um item ao pedido");
+                    return;
+                }
+                
+                Pedido pedido = new Pedido();
+                pedido.setNomeCliente(nomeClienteField.getText().trim());
+                pedido.setFormaPagamento((String) formaPagamentoCombo.getSelectedItem());
+                pedido.setModalidadeEntrega((String) modalidadeEntregaCombo.getSelectedItem());
+                
+                try {
+                    pedido.setTaxaEntrega(Double.parseDouble(taxaEntregaField.getText()));
+                    pedido.setTaxaServico(Double.parseDouble(taxaServicoField.getText()));
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(this, "Valores de taxa devem ser números válidos");
+                    return;
+                }
+                
+                if (!(usuarioLogado instanceof Vendedor)) {
+                    JOptionPane.showMessageDialog(this, "Apenas vendedores podem cadastrar pedidos");
+                    return;
+                }
+                
+                pedido.setVendedor((Vendedor) usuarioLogado);
+                pedido.setFranquiaId(((Vendedor) usuarioLogado).getFranquiaId());
+                
+                for (ItemPedido item : itensTemporarios) {
+                    pedido.adicionarItem(item);
+                }
+                
+                PedidoService pedidoService = new PedidoService();
+                pedidoService.cadastrar(pedido);
+                
+                JOptionPane.showMessageDialog(this, 
+                    String.format("Pedido cadastrado com sucesso!\nTotal: R$ %.2f", pedido.getTotal()));
+                showWelcomePanel();
+                
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Erro ao salvar pedido: " + ex.getMessage());
+            }
+        });
+        
+        cancelarBtn.addActionListener(e -> showWelcomePanel());
+        
+        buttonPanel.add(salvarBtn);
+        buttonPanel.add(cancelarBtn);
+        
+        JPanel centerPanel = new JPanel(new BorderLayout());
+        centerPanel.add(formPanel, BorderLayout.NORTH);
+        centerPanel.add(itensPanel, BorderLayout.CENTER);
+        
+        cadastroPanel.add(titleLabel, BorderLayout.NORTH);
+        cadastroPanel.add(centerPanel, BorderLayout.CENTER);
+        cadastroPanel.add(buttonPanel, BorderLayout.SOUTH);
+        
+        contentPanel.add(cadastroPanel, BorderLayout.CENTER);
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }
+    
+    private void showMeusPedidosPanel() {
+        contentPanel.removeAll();
+        
+        JPanel meusPanel = new JPanel(new BorderLayout());
+        meusPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        
+        JLabel titleLabel = new JLabel("🛍️ MEUS PEDIDOS", SwingConstants.CENTER);
+        titleLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 18));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
+        
+        JPanel statsPanel = new JPanel(new GridLayout(1, 4, 10, 10));
+        statsPanel.setBorder(BorderFactory.createTitledBorder("Minhas Estatísticas"));
+        
+        JLabel totalPedidosLabel = new JLabel("0", SwingConstants.CENTER);
+        JLabel pedidosEntreguesLabel = new JLabel("0", SwingConstants.CENTER);
+        JLabel faturamentoLabel = new JLabel("R$ 0,00", SwingConstants.CENTER);
+        JLabel ticketMedioLabel = new JLabel("R$ 0,00", SwingConstants.CENTER);
+        
+        totalPedidosLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 16));
+        pedidosEntreguesLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 16));
+        faturamentoLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 16));
+        ticketMedioLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 16));
+        
+        JPanel totalPanel = new JPanel(new BorderLayout());
+        totalPanel.add(new JLabel("Total de Pedidos", SwingConstants.CENTER), BorderLayout.NORTH);
+        totalPanel.add(totalPedidosLabel, BorderLayout.CENTER);
+        
+        JPanel entreguesPanel = new JPanel(new BorderLayout());
+        entreguesPanel.add(new JLabel("Pedidos Entregues", SwingConstants.CENTER), BorderLayout.NORTH);
+        entreguesPanel.add(pedidosEntreguesLabel, BorderLayout.CENTER);
+        
+        JPanel faturamentoPanel = new JPanel(new BorderLayout());
+        faturamentoPanel.add(new JLabel("Faturamento Total", SwingConstants.CENTER), BorderLayout.NORTH);
+        faturamentoPanel.add(faturamentoLabel, BorderLayout.CENTER);
+        
+        JPanel ticketPanel = new JPanel(new BorderLayout());
+        ticketPanel.add(new JLabel("Ticket Médio", SwingConstants.CENTER), BorderLayout.NORTH);
+        ticketPanel.add(ticketMedioLabel, BorderLayout.CENTER);
+        
+        statsPanel.add(totalPanel);
+        statsPanel.add(entreguesPanel);
+        statsPanel.add(faturamentoPanel);
+        statsPanel.add(ticketPanel);
+        
+        String[] columnNames = {"ID", "Cliente", "Data", "Status", "Valor Total"};
+        DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        
+        JTable pedidosTable = new JTable(tableModel);
+        pedidosTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        JScrollPane scrollPane = new JScrollPane(pedidosTable);
+        
+        Runnable carregarDados = () -> {
+            try {
+                if (!(usuarioLogado instanceof Vendedor)) {
+                    JOptionPane.showMessageDialog(this, "Esta funcionalidade é apenas para vendedores");
+                    return;
+                }
+                
+                PedidoService pedidoService = new PedidoService();
+                List<Pedido> meusPedidos = pedidoService.listarPedidosPorVendedor((Vendedor) usuarioLogado);
+                
+                tableModel.setRowCount(0);
+                for (Pedido pedido : meusPedidos) {
+                    Object[] row = {
+                        pedido.getId(),
+                        pedido.getNomeCliente(),
+                        pedido.getDataHora().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")),
+                        pedido.getStatus(),
+                        String.format("R$ %.2f", pedido.getTotal())
+                    };
+                    tableModel.addRow(row);
+                }
+                
+                int totalPedidos = meusPedidos.size();
+                long pedidosEntregues = meusPedidos.stream()
+                    .filter(p -> p.getStatus() == Pedido.StatusPedido.ENTREGUE)
+                    .count();
+                
+                double faturamentoTotal = meusPedidos.stream()
+                    .filter(p -> p.getStatus() == Pedido.StatusPedido.ENTREGUE)
+                    .mapToDouble(Pedido::getTotal)
+                    .sum();
+                
+                double ticketMedio = pedidosEntregues > 0 ? faturamentoTotal / pedidosEntregues : 0.0;
+                
+                totalPedidosLabel.setText(String.valueOf(totalPedidos));
+                pedidosEntreguesLabel.setText(String.valueOf(pedidosEntregues));
+                faturamentoLabel.setText(String.format("R$ %.2f", faturamentoTotal));
+                ticketMedioLabel.setText(String.format("R$ %.2f", ticketMedio));
+                
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(MainInterface.this, "Erro ao carregar dados: " + e.getMessage());
+            }
+        };
+        
+        carregarDados.run();
+        
+        JPanel actionsPanel = new JPanel(new FlowLayout());
+        JButton atualizarBtn = new JButton("Atualizar");
+        JButton novoBtn = new JButton("Novo Pedido");
+        
+        atualizarBtn.addActionListener(e -> carregarDados.run());
+        novoBtn.addActionListener(e -> showCadastroPedidoPanel());
+        
+        actionsPanel.add(atualizarBtn);
+        actionsPanel.add(novoBtn);
+        
+        JPanel detailsPanel = new JPanel(new BorderLayout());
+        detailsPanel.setBorder(BorderFactory.createTitledBorder("Detalhes do Pedido Selecionado"));
+        
+        JTextArea detailsArea = new JTextArea(6, 40);
+        detailsArea.setEditable(false);
+        detailsArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
+        JScrollPane detailsScrollPane = new JScrollPane(detailsArea);
+        detailsPanel.add(detailsScrollPane);
+        
+        pedidosTable.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int selectedRow = pedidosTable.getSelectedRow();
+                if (selectedRow >= 0) {
+                    try {
+                        Long pedidoId = (Long) tableModel.getValueAt(selectedRow, 0);
+                        PedidoService pedidoService = new PedidoService();
+                        Pedido pedido = pedidoService.buscarPorId(pedidoId);
+                        
+                        StringBuilder details = new StringBuilder();
+                        details.append("PEDIDO #").append(pedido.getId()).append(" - ").append(pedido.getStatus()).append("\n");
+                        details.append("Cliente: ").append(pedido.getNomeCliente()).append("\n");
+                        details.append("Data: ").append(pedido.getDataHora().format(
+                            java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))).append("\n");
+                        details.append("Forma Pagamento: ").append(pedido.getFormaPagamento()).append("\n");
+                        details.append("Entrega: ").append(pedido.getModalidadeEntrega()).append("\n\n");
+                        
+                        details.append("ITENS:\n");
+                        for (ItemPedido item : pedido.getItens()) {
+                            details.append(String.format("• %s (Qtd: %d) - R$ %.2f\n", 
+                                item.getProduto().getNome(), item.getQuantidade(), item.getSubtotal()));
+                        }
+                        
+                        details.append(String.format("\nTOTAL: R$ %.2f", pedido.getTotal()));
+                        
+                        detailsArea.setText(details.toString());
+                        detailsArea.setCaretPosition(0);
+                        
+                    } catch (Exception ex) {
+                        detailsArea.setText("Erro ao carregar detalhes: " + ex.getMessage());
+                    }
+                }
+            }
+        });
+        
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        JButton voltarBtn = new JButton("Voltar");
+        voltarBtn.addActionListener(e -> showWelcomePanel());
+        buttonPanel.add(voltarBtn);
+        
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.add(titleLabel, BorderLayout.NORTH);
+        topPanel.add(statsPanel, BorderLayout.CENTER);
+        topPanel.add(actionsPanel, BorderLayout.SOUTH);
+        
+        JPanel centerPanel = new JPanel(new BorderLayout());
+        centerPanel.add(scrollPane, BorderLayout.CENTER);
+        centerPanel.add(detailsPanel, BorderLayout.SOUTH);
+        
+        meusPanel.add(topPanel, BorderLayout.NORTH);
+        meusPanel.add(centerPanel, BorderLayout.CENTER);
+        meusPanel.add(buttonPanel, BorderLayout.SOUTH);
+        
+        contentPanel.add(meusPanel, BorderLayout.CENTER);
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }
+    
+    private void showRelatoriosConsolidadosPanel() {
+        contentPanel.removeAll();
+        
+        JPanel relatoriosPanel = new JPanel(new GridLayout(2, 2, 10, 10));
+        relatoriosPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        
+        JPanel franquiasPanel = createRelatorioPanel("📊 Relatório de Franquias", 
+            getFranquiasRelatoriο());
+        
+        JPanel usuariosPanel = createRelatorioPanel("👥 Relatório de Usuários", 
+            getUsuariosRelatorio());
+        
+        JPanel produtosPanel = createRelatorioPanel("📦 Relatório de Produtos", 
+            getProdutosRelatorio());
+        
+        JPanel vendedoresPanel = createRelatorioPanel("🏆 Ranking de Vendedores", 
+            getVendedoresRelatorio());
+        
+        relatoriosPanel.add(franquiasPanel);
+        relatoriosPanel.add(usuariosPanel);
+        relatoriosPanel.add(produtosPanel);
+        relatoriosPanel.add(vendedoresPanel);
+        
+        JLabel titleLabel = new JLabel("📈 RELATÓRIOS CONSOLIDADOS DO SISTEMA", SwingConstants.CENTER);
+        titleLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 18));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 20, 0));
+        
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        JButton voltarBtn = new JButton("Voltar");
+        JButton atualizarBtn = new JButton("Atualizar Dados");
+        
+        voltarBtn.addActionListener(e -> showDashboard());
+        atualizarBtn.addActionListener(e -> showRelatoriosConsolidadosPanel());
+        
+        buttonPanel.add(atualizarBtn);
+        buttonPanel.add(voltarBtn);
+        
+        contentPanel.add(titleLabel, BorderLayout.NORTH);
+        contentPanel.add(relatoriosPanel, BorderLayout.CENTER);
+        contentPanel.add(buttonPanel, BorderLayout.SOUTH);
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }
+    
+    private JPanel createRelatorioPanel(String titulo, String conteudo) {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.GRAY), titulo));
+        
+        JTextArea textArea = new JTextArea(conteudo);
+        textArea.setEditable(false);
+        textArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+        textArea.setBackground(new Color(248, 248, 248));
+        
+        JScrollPane scrollPane = new JScrollPane(textArea);
+        scrollPane.setPreferredSize(new Dimension(300, 200));
+        
+        panel.add(scrollPane, BorderLayout.CENTER);
+        return panel;
+    }
     
     private String getFranquiasRelatoriο() {
         try {
-            java.util.List<Franquia> franquias = franquiaService.listar();
+            List<Franquia> franquias = franquiaService.listarFranquias();
             StringBuilder sb = new StringBuilder();
             
             sb.append("TOTAL DE FRANQUIAS: ").append(franquias.size()).append("\n\n");
@@ -2567,7 +2552,7 @@ public class MainInterface extends JFrame {
     }
     
     private String getUsuariosRelatorio() {
-        java.util.List<Usuario> usuarios = usuarioService.listarUsuarios();
+        List<Usuario> usuarios = usuarioService.listarUsuarios();
         StringBuilder sb = new StringBuilder();
         
         long donos = usuarios.stream().filter(u -> u instanceof Dono).count();
@@ -2588,8 +2573,8 @@ public class MainInterface extends JFrame {
     }
     
     private String getProdutosRelatorio() {
-        java.util.List<Produto> produtos = produtoService.listarProdutos();
-        java.util.List<Produto> estoqueBaixo = produtoService.listarProdutosEstoqueBaixo();
+        List<Produto> produtos = produtoService.listarProdutos();
+        List<Produto> estoqueBaixo = produtoService.listarProdutosEstoqueBaixo();
         
         StringBuilder sb = new StringBuilder();
         
@@ -2614,7 +2599,7 @@ public class MainInterface extends JFrame {
     }
     
     private String getVendedoresRelatorio() {
-        java.util.List<Vendedor> vendedores = usuarioService.listarVendedores();
+        List<Vendedor> vendedores = usuarioService.listarVendedores();
         
         vendedores.sort((v1, v2) -> Double.compare(v2.getTotalVendas(), v1.getTotalVendas()));
         
@@ -2671,7 +2656,8 @@ public class MainInterface extends JFrame {
                     if (novoEmail != null && !novoEmail.trim().isEmpty()) {
                         usuarioService.editarUsuario(gerenteId, novoNome.trim(), novoEmail.trim());
                         JOptionPane.showMessageDialog(this, "Gerente editado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-                        showListaGerentesPanel();                     }
+                        showListaGerentesPanel();
+                    }
                 }
             }
         } catch (Exception ex) {
@@ -2691,7 +2677,7 @@ public class MainInterface extends JFrame {
                     if (novoEmail != null && !novoEmail.trim().isEmpty()) {
                         usuarioService.editarUsuario(vendedorId, novoNome.trim(), novoEmail.trim());
                         JOptionPane.showMessageDialog(this, "Vendedor editado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-                        showListaVendedoresPanel(); // Recarregar lista
+                        showListaVendedoresPanel();
                     }
                 }
             }
@@ -2764,7 +2750,7 @@ public class MainInterface extends JFrame {
                         produtoService.editarProduto(produtoId, nome, descricao, preco, estoque, estoqueMin, categoria);
                         JOptionPane.showMessageDialog(dialog, "Produto editado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
                         dialog.dispose();
-                        showListaProdutosPanel(); 
+                        showListaProdutosPanel();
                         
                     } catch (NumberFormatException ex) {
                         JOptionPane.showMessageDialog(dialog, "Verifique se os valores numéricos estão corretos", "Erro", JOptionPane.ERROR_MESSAGE);
@@ -2806,7 +2792,7 @@ public class MainInterface extends JFrame {
             UsuarioService service = new UsuarioService();
             try {
                 Usuario usuario = service.login("admin@franquia.com", "admin123");
-                new MainInterface(usuario).setVisible(true);
+                new MainInterface(usuario, service).setVisible(true);
             } catch (Exception e) {
                 new LoginPainel().setVisible(true);
             }
@@ -2814,7 +2800,7 @@ public class MainInterface extends JFrame {
     }
     
     private void editarGerenteFranquia(Long franquiaId, String nomeFranquia) {
-        panelPrincipal.removeAll();
+        contentPanel.removeAll();
         
         Franquia franquia = franquiaService.buscarFranquiaPorId(franquiaId);
         if (franquia == null) {
@@ -2843,7 +2829,7 @@ public class MainInterface extends JFrame {
         
         gbc.gridx = 0; gbc.gridy = 2;
         formPanel.add(new JLabel("Local:"), gbc);
-        JLabel localLabel = new JLabel(franquia.getEndereco().getCidade() + "/" + franquia.getEndereco().getEstado());
+        JLabel localLabel = new JLabel(franquia.getCidade() + "/" + franquia.getEstado());
         gbc.gridx = 1;
         formPanel.add(localLabel, gbc);
         
@@ -2877,7 +2863,7 @@ public class MainInterface extends JFrame {
         JComboBox<Gerente> novoGerenteCombo = new JComboBox<>();
         novoGerenteCombo.addItem(null); 
         
-        var gerentesDisponiveis = usuarioService.listarGerentesDisponiveis();
+        List<Gerente> gerentesDisponiveis = usuarioService.listarGerentesDisponiveis();
         gerentesDisponiveis.forEach(novoGerenteCombo::addItem);
         
         if (franquia.getGerente() != null) {
@@ -2944,7 +2930,7 @@ public class MainInterface extends JFrame {
                     usuarioService.atualizarFranquiaIdGerente(novoGerente.getId(), franquia.getId());
                 }
                 
-                franquiaService.atualizar(franquia);
+                franquiaService.atualizarFranquia(franquia);
                 
                 String mensagem = "✅ Gerente da franquia \"" + nomeFranquia + "\" atualizado!\n\n";
                 if (gerenteAnterior != null && novoGerente == null) {
@@ -2975,9 +2961,9 @@ public class MainInterface extends JFrame {
         gbc.gridx = 0; gbc.gridy = 8; gbc.gridwidth = 2;
         formPanel.add(buttonPanel, gbc);
         
-        panelPrincipal.add(formPanel, BorderLayout.CENTER);
-        panelPrincipal.revalidate();
-        panelPrincipal.repaint();
+        contentPanel.add(formPanel, BorderLayout.CENTER);
+        contentPanel.revalidate();
+        contentPanel.repaint();
     }
     
     private void mostrarDetalhesFranquia(Long franquiaId) {
@@ -2993,9 +2979,9 @@ public class MainInterface extends JFrame {
         detalhes.append("🏢 Nome: ").append(franquia.getNome()).append("\n");
         detalhes.append("🆔 ID: ").append(franquia.getId()).append("\n");
         detalhes.append("📍 Endereço: ").append(franquia.getEndereco()).append("\n");
-        detalhes.append("🏙️ Cidade: ").append(franquia.getEndereco().getCidade()).append("\n");
-        detalhes.append("🗺️ Estado: ").append(franquia.getEndereco().getEstado()).append("\n");
-        detalhes.append("📮 CEP: ").append(franquia.getEndereco().getCep()).append("\n\n");
+        detalhes.append("🏙️ Cidade: ").append(franquia.getCidade()).append("\n");
+        detalhes.append("🗺️ Estado: ").append(franquia.getEstado()).append("\n");
+        detalhes.append("📮 CEP: ").append(franquia.getCep()).append("\n\n");
         
         detalhes.append("👥 GERENTE\n");
         detalhes.append("─────────────────────────\n");
@@ -3106,10 +3092,9 @@ public class MainInterface extends JFrame {
             }
         }
     }
-
+    
     private void mostrarSobre() {
-        String sobre = "Sistema de Gestão de Franquias\n" +
-                      "Versão 1.0\n\n" +
+        String sobre = "Sistema de Gestão de Franquias\n\n" +
                       "Desenvolvido por:\n" +
                       "Sara Ingrid\n" +
                       "Angélica\n\n" +
@@ -3117,24 +3102,5 @@ public class MainInterface extends JFrame {
                       "DCC025 - Programação Orientada a Objetos";
         
         JOptionPane.showMessageDialog(this, sobre, "Sobre", JOptionPane.INFORMATION_MESSAGE);
-    }
-    
-    private void sair() {
-        int opcao = JOptionPane.showConfirmDialog(this, 
-            "Deseja realmente sair do sistema?", 
-            "Confirmação", 
-            JOptionPane.YES_NO_OPTION);
-        
-        if (opcao == JOptionPane.YES_OPTION) {
-            System.exit(0);
-        }
-    }
-
-    public JLabel getLabelUsuario() {
-        return labelUsuario;
-    }
-
-    public JPanel getPanelPrincipal() {
-        return panelPrincipal;
     }
 }
